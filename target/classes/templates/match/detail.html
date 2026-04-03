@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/springsecurity6"
+      th:replace="~{layout :: layout(content=~{::content})}">
+<head><title>Match Details</title></head>
+<body>
+<th:block th:fragment="content">
+    <div class="match-hero card">
+        <div class="match-hero__teams">
+            <div class="match-hero__team">
+                <span class="hero-flag" th:text="${@flagUtil.get(match.countryA)}"></span>
+                <span th:text="${match.countryA}"></span>
+            </div>
+            <div class="match-hero__score"
+                 th:text="${match.goalsA != null} ? ${match.goalsA} + ' – ' + ${match.goalsB} : 'vs'">vs</div>
+            <div class="match-hero__team">
+                <span class="hero-flag" th:text="${@flagUtil.get(match.countryB)}"></span>
+                <span th:text="${match.countryB}"></span>
+            </div>
+        </div>
+        <div class="match-hero__meta">
+            <span>📅 <span th:text="${#temporals.format(match.matchDate, 'dd MMM yyyy, HH:mm')}"></span></span>
+            <span>📍 <span th:text="${match.city}"></span>, <span th:text="${match.stadium}"></span></span>
+        </div>
+    </div>
+
+    <div class="card" sec:authorize="isAuthenticated()">
+        <h2 th:text="#{match.detail.prediction.title}">Your Prediction</h2>
+
+        <div th:if="${existingPrediction}" class="prediction-existing">
+            <span th:text="#{match.detail.prediction.current}">Current prediction</span>:
+            <strong th:text="${existingPrediction.predictedGoalsA} + ' – ' + ${existingPrediction.predictedGoalsB}"></strong>
+            <span th:if="${existingPrediction.pointsAwarded != null}" class="points-badge">
+                <span th:text="${existingPrediction.pointsAwarded}"></span> pts
+            </span>
+        </div>
+
+        <form th:if="${match.goalsA == null}" th:action="@{/matches/{id}/predict(id=${match.id})}"
+              th:object="${predictionDto}" method="post" class="prediction-form">
+            <div class="prediction-inputs">
+                <div class="prediction-input-group">
+                    <label th:text="${match.countryA}">Country A</label>
+                    <input type="number" th:field="*{goalsA}" min="0" class="goal-input"/>
+                </div>
+                <div class="prediction-sep">–</div>
+                <div class="prediction-input-group">
+                    <label th:text="${match.countryB}">Country B</label>
+                    <input type="number" th:field="*{goalsB}" min="0" class="goal-input"/>
+                </div>
+            </div>
+            <div class="error-msg" th:if="${#fields.hasErrors('*')}" th:errors="*{*}"></div>
+            <button type="submit" class="btn" th:text="#{match.detail.prediction.submit}">Submit Prediction</button>
+        </form>
+
+        <p th:if="${match.goalsA != null}" class="muted-note" th:text="#{match.detail.ended}">
+            This match has ended. Predictions are closed.
+        </p>
+    </div>
+</th:block>
+</body>
+</html>

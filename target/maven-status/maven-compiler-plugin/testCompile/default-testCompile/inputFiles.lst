@@ -1,0 +1,7 @@
+/home/rares/projects/ewdj-project/src/test/java/com/worldcup/controller/AuthControllerTest.java
+/home/rares/projects/ewdj-project/src/test/java/com/worldcup/controller/HomeControllerTest.java
+/home/rares/projects/ewdj-project/src/test/java/com/worldcup/controller/admin/AdminMatchControllerTest.java
+/home/rares/projects/ewdj-project/src/test/java/com/worldcup/rest/MatchRestControllerTest.java
+/home/rares/projects/ewdj-project/src/test/java/com/worldcup/security/SecurityConfigTest.java
+/home/rares/projects/ewdj-project/src/test/java/com/worldcup/validation/ChecksumValidatorTest.java
+/home/rares/projects/ewdj-project/src/test/java/com/worldcup/validation/EmailValidatorTest.java

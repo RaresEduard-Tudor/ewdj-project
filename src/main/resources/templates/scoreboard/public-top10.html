@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(content=~{::content})}">
+<head><title>Public Top 10</title></head>
+<body>
+<th:block th:fragment="content">
+    <h1 th:text="#{nav.top10}">Public Top 10</h1>
+    <div th:if="${#lists.isEmpty(teams)}" class="card">
+        <p th:text="#{top10.empty}">No teams yet.</p>
+    </div>
+    <table th:if="${!#lists.isEmpty(teams)}" class="card">
+        <thead>
+        <tr>
+            <th th:text="#{scoreboard.rank}">Rank</th>
+            <th th:text="#{top10.team.col}">Team</th>
+            <th th:text="#{top10.members.col}">Members</th>
+            <th th:text="#{scoreboard.score}">Score</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="team, stat : ${teams}">
+            <td>
+                <span th:class="${stat.count <= 3} ? 'rank-badge top3' : 'rank-badge'"
+                      th:text="${stat.count}"></span>
+            </td>
+            <td th:text="${team.name}"></td>
+            <td th:text="${#lists.size(team.members)}"></td>
+            <td class="pts-cell" th:text="${teamScores[team.id]}">0</td>
+        </tr>
+        </tbody>
+    </table>
+</th:block>
+</body>
+</html>
