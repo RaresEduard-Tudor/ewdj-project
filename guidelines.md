@@ -87,7 +87,7 @@ Admins can add matches via a form.
 
 Admins can also edit matches and enter official final scores after the match is played.
 
-### 5. Predictions (User)
+### 5. Predictions (User) 
 
 Each user can predict for every match:
 
