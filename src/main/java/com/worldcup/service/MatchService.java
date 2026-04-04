@@ -44,10 +44,17 @@ public class MatchService {
     }
 
     public void save(MatchDto dto) {
-        if (dto.getStadium() != null && dto.getMatchDate() != null &&
-            matchRepository.existsByStadiumAndMatchDate(dto.getStadium(), dto.getMatchDate())) {
-            throw new DuplicateMatchException("A match at " + dto.getStadium() +
-                " on " + dto.getMatchDate() + " already exists.");
+        if (dto.getStadium() != null && dto.getMatchDate() != null) {
+            boolean duplicate = matchRepository.findAll().stream()
+                .filter(m -> !m.getId().equals(dto.getId()))
+                .anyMatch(m -> m.getStadium() != null &&
+                    m.getStadium().equals(dto.getStadium()) &&
+                    m.getMatchDate() != null &&
+                    m.getMatchDate().equals(dto.getMatchDate()));
+            if (duplicate) {
+                throw new DuplicateMatchException("A match at " + dto.getStadium() +
+                    " on " + dto.getMatchDate() + " already exists.");
+            }
         }
         Match match = (dto.getId() != null) ?
             matchRepository.findById(dto.getId()).orElse(new Match()) : new Match();

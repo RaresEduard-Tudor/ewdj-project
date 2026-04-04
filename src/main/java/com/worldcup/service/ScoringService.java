@@ -3,10 +3,10 @@ package com.worldcup.service;
 import com.worldcup.domain.Match;
 import com.worldcup.domain.Prediction;
 import com.worldcup.repository.PredictionRepository;
-import com.worldcup.repository.TeamRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -19,14 +19,12 @@ public class ScoringService {
     @Value("${scoring.bonus.outcome}") private int C;
 
     private final PredictionRepository predictionRepository;
-    private final TeamRepository teamRepository;
 
-    public ScoringService(PredictionRepository predictionRepository,
-                          TeamRepository teamRepository) {
+    public ScoringService(PredictionRepository predictionRepository) {
         this.predictionRepository = predictionRepository;
-        this.teamRepository = teamRepository;
     }
 
+    @Transactional
     public void calculateScoresForMatch(Match match) {
         if (match.getGoalsA() == null || match.getGoalsB() == null) return;
 
