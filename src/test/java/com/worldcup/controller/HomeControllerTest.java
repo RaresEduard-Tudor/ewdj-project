@@ -1,9 +1,14 @@
 package com.worldcup.controller;
 
+import com.worldcup.config.PasswordEncoderConfig;
+import com.worldcup.config.SecurityConfig;
+import com.worldcup.interceptor.AdminAuditInterceptor;
 import com.worldcup.service.MatchService;
+import com.worldcup.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
@@ -12,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(HomeController.class)
+@Import({SecurityConfig.class, PasswordEncoderConfig.class})
 class HomeControllerTest {
 
     @Autowired
@@ -19,6 +25,12 @@ class HomeControllerTest {
 
     @MockitoBean
     MatchService matchService;
+
+    @MockitoBean
+    UserService userService;
+
+    @MockitoBean
+    AdminAuditInterceptor adminAuditInterceptor;
 
     @Test
     void homePage_shouldReturn200() throws Exception {

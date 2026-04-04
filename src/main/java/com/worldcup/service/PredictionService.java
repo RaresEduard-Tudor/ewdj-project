@@ -30,7 +30,7 @@ public class PredictionService {
         Match match = matchRepository.findById(dto.getMatchId())
             .orElseThrow(() -> new TeamNotFoundException("Match not found: " + dto.getMatchId()));
 
-        LocalDateTime deadline = match.getMatchDate().minusDays(3);
+        LocalDateTime deadline = match.getMatchDate().minusHours(1);
         if (LocalDateTime.now().isAfter(deadline)) {
             throw new PredictionDeadlineException(
                 match.getCountryA() + " vs " + match.getCountryB(), deadline);

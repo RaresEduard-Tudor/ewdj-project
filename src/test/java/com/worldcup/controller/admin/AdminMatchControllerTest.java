@@ -1,20 +1,30 @@
 package com.worldcup.controller.admin;
 
+import com.worldcup.config.PasswordEncoderConfig;
+import com.worldcup.config.SecurityConfig;
+import com.worldcup.interceptor.AdminAuditInterceptor;
 import com.worldcup.service.MatchService;
 import com.worldcup.service.ScoringService;
+import com.worldcup.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import java.util.List;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AdminMatchController.class)
+@Import({SecurityConfig.class, PasswordEncoderConfig.class})
 class AdminMatchControllerTest {
 
     @Autowired
@@ -28,6 +38,20 @@ class AdminMatchControllerTest {
 
     @MockitoBean
     MessageSource messageSource;
+
+    @MockitoBean
+    UserService userService;
+
+    @MockitoBean
+    AdminAuditInterceptor adminAuditInterceptor;
+
+    @BeforeEach
+    void allowInterceptor() throws Exception {
+        when(adminAuditInterceptor.preHandle(
+            any(HttpServletRequest.class),
+            any(HttpServletResponse.class),
+            any())).thenReturn(true);
+    }
 
     @Test
     @WithMockUser(roles = "ADMIN")

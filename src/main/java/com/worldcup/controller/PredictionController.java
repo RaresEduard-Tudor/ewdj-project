@@ -32,7 +32,7 @@ public class PredictionController {
     public String myPredictions(Model model, Principal principal) {
         User user = userService.findByUsername(principal.getName());
         List<Prediction> predictions = predictionService.findByUser(user);
-        LocalDateTime cutoff = LocalDateTime.now().plusDays(3);
+        LocalDateTime cutoff = LocalDateTime.now().plusHours(1);
         Set<Long> editableIds = predictions.stream()
             .filter(p -> p.getMatch().getMatchDate().isAfter(cutoff))
             .map(Prediction::getId)

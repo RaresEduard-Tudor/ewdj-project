@@ -6,10 +6,10 @@
 <th:block th:fragment="content">
     <div class="card" style="max-width:600px">
         <h1 th:text="${matchDto.id != null} ? 'Edit Match' : 'Add Match'">Match Form</h1>
-        <div th:if="${#fields.hasGlobalErrors()}" class="alert-error">
-            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
-        </div>
         <form th:action="@{/admin/matches}" th:object="${matchDto}" method="post">
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert-error">
+                <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            </div>
             <input type="hidden" th:field="*{id}"/>
 
             <label>Country A</label>
