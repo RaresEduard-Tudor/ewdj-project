@@ -38,6 +38,9 @@ public class UserService implements UserDetailsService {
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
             throw new DuplicateUsernameException("Username already taken.");
         }
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new DuplicateUsernameException("Email already in use.");
+        }
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());

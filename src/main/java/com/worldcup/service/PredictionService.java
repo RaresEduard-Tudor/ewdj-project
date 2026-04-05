@@ -10,6 +10,7 @@ import com.worldcup.repository.MatchRepository;
 import com.worldcup.repository.PredictionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class PredictionService {
         this.predictionRepository = predictionRepository;
     }
 
+    @Transactional
     public void savePrediction(PredictionDto dto, User user) {
         Match match = matchRepository.findById(dto.getMatchId())
             .orElseThrow(() -> new MatchNotFoundException("Match not found: " + dto.getMatchId()));

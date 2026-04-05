@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.hibernate.Hibernate;
 import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,6 +44,10 @@ public class TeamController {
         List<Team> teams = user.getTeams().stream()
             .sorted(java.util.Comparator.comparing(Team::getName))
             .collect(Collectors.toList());
+        teams.forEach(t -> {
+            Hibernate.initialize(t.getMembers());
+            Hibernate.initialize(t.getOwner());
+        });
         model.addAttribute("myTeams", teams);
         model.addAttribute("currentUser", principal.getName());
         return "team/list";
@@ -107,6 +112,8 @@ public class TeamController {
         if (team.getMembers().stream().noneMatch(m -> m.getId().equals(user.getId()))) {
             throw new org.springframework.security.access.AccessDeniedException("You are not a member of this team.");
         }
+        Hibernate.initialize(team.getMembers());
+        Hibernate.initialize(team.getOwner());
         model.addAttribute("team", team);
         model.addAttribute("currentUser", principal.getName());
 
@@ -137,6 +144,8 @@ public class TeamController {
         if (!team.getMembers().stream().anyMatch(m -> m.getUsername().equals(user.getUsername()))) {
             throw new org.springframework.security.access.AccessDeniedException("You are not a member of this team.");
         }
+
+        Hibernate.initialize(team.getMembers());
 
         Map<User, Integer> ranked = team.getMembers().stream()
             .collect(Collectors.toMap(m -> m, m -> predictionRepository.getTotalScoreForUser(m)))

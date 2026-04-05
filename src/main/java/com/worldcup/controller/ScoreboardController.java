@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import org.hibernate.Hibernate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class ScoreboardController {
     @Transactional(readOnly = true)
     public String publicTop10(Model model) {
         List<Team> teams = teamRepository.findTop10ByTotalScore(PageRequest.of(0, 10));
+        teams.forEach(t -> Hibernate.initialize(t.getMembers()));
         Map<Long, Integer> teamScores = teams.stream()
             .collect(Collectors.toMap(
                 Team::getId,

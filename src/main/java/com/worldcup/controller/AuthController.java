@@ -1,6 +1,7 @@
 package com.worldcup.controller;
 
 import com.worldcup.dto.RegistrationDto;
+import com.worldcup.exception.DuplicateUsernameException;
 import com.worldcup.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,12 @@ public class AuthController {
         if (bindingResult.hasErrors()) {
             return "auth/register";
         }
-        userService.register(dto);
+        try {
+            userService.register(dto);
+        } catch (DuplicateUsernameException e) {
+            bindingResult.reject("registration.duplicate", e.getMessage());
+            return "auth/register";
+        }
         return "redirect:/login?registered";
     }
 }

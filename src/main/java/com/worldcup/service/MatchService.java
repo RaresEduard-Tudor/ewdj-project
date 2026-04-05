@@ -7,6 +7,7 @@ import com.worldcup.exception.MatchNotFoundException;
 import com.worldcup.repository.MatchRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -20,10 +21,19 @@ public class MatchService {
 
     private static final Map<String, Integer> STADIUM_CAPACITIES = new HashMap<>();
     static {
-        STADIUM_CAPACITIES.put("1001", 80000);
-        STADIUM_CAPACITIES.put("1002", 70000);
-        STADIUM_CAPACITIES.put("1003", 65000);
-        STADIUM_CAPACITIES.put("1004", 60000);
+        STADIUM_CAPACITIES.put("1001", 82500);  // MetLife Stadium
+        STADIUM_CAPACITIES.put("1111", 54500);  // BC Place
+        STADIUM_CAPACITIES.put("1234", 80000);  // AT&T Stadium
+        STADIUM_CAPACITIES.put("2222", 30000);  // BMO Field
+        STADIUM_CAPACITIES.put("2345", 70240);  // SoFi Stadium
+        STADIUM_CAPACITIES.put("3333", 87523);  // Estadio Azteca
+        STADIUM_CAPACITIES.put("3456", 68500);  // Levi's Stadium
+        STADIUM_CAPACITIES.put("4567", 65326);  // Hard Rock Stadium
+        STADIUM_CAPACITIES.put("5678", 69176);  // Lincoln Financial Field
+        STADIUM_CAPACITIES.put("6789", 76416);  // Arrowhead Stadium
+        STADIUM_CAPACITIES.put("7890", 65878);  // Gillette Stadium
+        STADIUM_CAPACITIES.put("8901", 76125);  // Empower Field at Mile High
+        STADIUM_CAPACITIES.put("9012", 68740);  // Lumen Field
     }
 
     public MatchService(MatchRepository matchRepository) {
@@ -43,6 +53,7 @@ public class MatchService {
             .orElseThrow(() -> new MatchNotFoundException("Match not found: " + id));
     }
 
+    @Transactional
     public void save(MatchDto dto) {
         if (dto.getStadium() != null && dto.getMatchDate() != null) {
             boolean duplicate = matchRepository.findAll().stream()
@@ -69,6 +80,7 @@ public class MatchService {
         log.info("Match saved: {} vs {}", dto.getCountryA(), dto.getCountryB());
     }
 
+    @Transactional
     public void saveResult(Long id, Integer goalsA, Integer goalsB) {
         Match match = findById(id);
         match.setGoalsA(goalsA);
