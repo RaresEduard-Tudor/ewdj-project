@@ -12,7 +12,7 @@ public class MatchDateValidator implements ConstraintValidator<ValidMatchDate, L
 
     @Override
     public boolean isValid(LocalDateTime value, ConstraintValidatorContext ctx) {
-        if (value == null) return false;
+        if (value == null) return true;
         LocalDate date = value.toLocalDate();
         return !date.isBefore(WC_START) && !date.isAfter(WC_END);
     }

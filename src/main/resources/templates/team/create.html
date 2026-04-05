@@ -5,11 +5,11 @@
 <body>
 <th:block th:fragment="content">
     <div class="card" style="max-width:400px">
-        <h1>Create a Team</h1>
+        <h1 th:text="#{team.create.title}">Create a Team</h1>
         <form th:action="@{/team/create}" method="post">
             <label th:text="#{team.name.label}">Team name</label>
             <input type="text" name="name" required/>
-            <button type="submit" class="btn">Create Team</button>
+            <button type="submit" class="btn" th:text="#{team.create.submit}">Create Team</button>
         </form>
     </div>
 </th:block>

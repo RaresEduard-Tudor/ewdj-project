@@ -1,5 +1,6 @@
 package com.worldcup.controller;
 
+import com.worldcup.client.StadiumCapacityClient;
 import com.worldcup.domain.Match;
 import com.worldcup.domain.Prediction;
 import com.worldcup.domain.User;
@@ -28,13 +29,16 @@ public class MatchController {
     private final PredictionService predictionService;
     private final UserService userService;
     private final PredictionRepository predictionRepository;
+    private final StadiumCapacityClient stadiumCapacityClient;
 
     public MatchController(MatchService matchService, PredictionService predictionService,
-                           UserService userService, PredictionRepository predictionRepository) {
+                           UserService userService, PredictionRepository predictionRepository,
+                           StadiumCapacityClient stadiumCapacityClient) {
         this.matchService = matchService;
         this.predictionService = predictionService;
         this.userService = userService;
         this.predictionRepository = predictionRepository;
+        this.stadiumCapacityClient = stadiumCapacityClient;
     }
 
     @GetMapping
@@ -54,6 +58,10 @@ public class MatchController {
         Match match = matchService.findById(id);
         model.addAttribute("match", match);
         model.addAttribute("predictionDto", new PredictionDto());
+        if (match.getStadiumCode() != null) {
+            Integer capacity = stadiumCapacityClient.fetchCapacity(match.getStadiumCode());
+            model.addAttribute("stadiumCapacity", capacity);
+        }
         if (principal != null) {
             User user = userService.findByUsername(principal.getName());
             predictionRepository.findByUserAndMatch(user, match)

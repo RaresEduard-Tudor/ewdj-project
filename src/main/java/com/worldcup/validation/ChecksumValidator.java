@@ -8,7 +8,7 @@ public class ChecksumValidator implements ConstraintValidator<ValidChecksum, Mat
 
     @Override
     public boolean isValid(MatchDto dto, ConstraintValidatorContext ctx) {
-        if (dto.getStadiumCode() == null || dto.getChecksum() == null) return false;
+        if (dto.getStadiumCode() == null || dto.getChecksum() == null) return true;
         try {
             int code = Integer.parseInt(dto.getStadiumCode());
             return dto.getChecksum().equals(code % 97);

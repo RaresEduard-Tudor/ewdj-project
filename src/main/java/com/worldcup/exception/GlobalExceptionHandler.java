@@ -32,6 +32,20 @@ public class GlobalExceptionHandler {
         return "error/error";
     }
 
+    @ExceptionHandler(MatchNotFoundException.class)
+    public String handleMatchNotFound(MatchNotFoundException ex, Model model) {
+        log.warn("Match not found: {}", ex.getMessage());
+        model.addAttribute("error", ex.getMessage());
+        return "error/error";
+    }
+
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public String handleDuplicateUsername(DuplicateUsernameException ex, Model model) {
+        log.warn("Duplicate username: {}", ex.getMessage());
+        model.addAttribute("error", ex.getMessage());
+        return "error/error";
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public String handleAccessDenied(AccessDeniedException ex, Model model) {
         log.warn("Access denied: {}", ex.getMessage());

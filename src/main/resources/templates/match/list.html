@@ -53,8 +53,8 @@
                 <span th:text="${match.stadium}"></span>
             </div>
             <div class="match-card__action">
-                <span th:if="${match.goalsA != null}" class="badge badge-done">Final</span>
-                <span th:if="${match.goalsA == null}" class="badge badge-upcoming">Upcoming</span>
+                <span th:if="${match.goalsA != null}" class="badge badge-done" th:text="#{badge.final}">Final</span>
+                <span th:if="${match.goalsA == null}" class="badge badge-upcoming" th:text="#{badge.upcoming}">Upcoming</span>
             </div>
         </div>
     </div>

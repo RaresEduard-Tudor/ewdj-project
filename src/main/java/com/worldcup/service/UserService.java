@@ -2,7 +2,7 @@ package com.worldcup.service;
 
 import com.worldcup.domain.User;
 import com.worldcup.dto.RegistrationDto;
-import com.worldcup.exception.DuplicateTeamNameException;
+import com.worldcup.exception.DuplicateUsernameException;
 import com.worldcup.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,7 +36,7 @@ public class UserService implements UserDetailsService {
 
     public void register(RegistrationDto dto) {
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new DuplicateTeamNameException("Username already taken.");
+            throw new DuplicateUsernameException("Username already taken.");
         }
         User user = new User();
         user.setUsername(dto.getUsername());

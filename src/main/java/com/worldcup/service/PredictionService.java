@@ -5,7 +5,7 @@ import com.worldcup.domain.Prediction;
 import com.worldcup.domain.User;
 import com.worldcup.dto.PredictionDto;
 import com.worldcup.exception.PredictionDeadlineException;
-import com.worldcup.exception.TeamNotFoundException;
+import com.worldcup.exception.MatchNotFoundException;
 import com.worldcup.repository.MatchRepository;
 import com.worldcup.repository.PredictionRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ public class PredictionService {
 
     public void savePrediction(PredictionDto dto, User user) {
         Match match = matchRepository.findById(dto.getMatchId())
-            .orElseThrow(() -> new TeamNotFoundException("Match not found: " + dto.getMatchId()));
+            .orElseThrow(() -> new MatchNotFoundException("Match not found: " + dto.getMatchId()));
 
         LocalDateTime deadline = match.getMatchDate().minusHours(1);
         if (LocalDateTime.now().isAfter(deadline)) {

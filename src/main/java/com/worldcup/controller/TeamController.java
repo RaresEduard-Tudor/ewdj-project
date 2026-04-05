@@ -103,6 +103,10 @@ public class TeamController {
     @Transactional(readOnly = true)
     public String detail(@PathVariable Long id, Model model, Principal principal) {
         Team team = teamService.findById(id);
+        User user = userService.findByUsername(principal.getName());
+        if (team.getMembers().stream().noneMatch(m -> m.getId().equals(user.getId()))) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not a member of this team.");
+        }
         model.addAttribute("team", team);
         model.addAttribute("currentUser", principal.getName());
 

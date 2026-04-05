@@ -17,7 +17,7 @@
            class="team-card">
             <div class="team-card__name" th:text="${team.name}">Team Name</div>
             <div class="team-card__meta">
-                <span th:text="${#lists.size(team.members)} + ' members'"></span>
+                <span th:text="#{team.members.count(${#lists.size(team.members)})}"></span>
                 <span th:if="${team.owner.username == currentUser}" class="owner-badge" th:text="#{team.owner.badge}">Owner</span>
             </div>
         </a>

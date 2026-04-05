@@ -53,8 +53,8 @@
                 <span th:text="${match.stadium}"></span>
             </div>
             <div class="match-card__action">
-                <span class="badge badge-upcoming">Upcoming</span>
-                <a th:href="@{/matches/{id}(id=${match.id})}" class="btn btn-sm">Predict</a>
+                <span class="badge badge-upcoming" th:text="#{badge.upcoming}">Upcoming</span>
+                <a th:href="@{/matches/{id}(id=${match.id})}" class="btn btn-sm" th:text="#{badge.predict}">Predict</a>
             </div>
         </div>
         <div style="margin-top:12px">

@@ -3,7 +3,7 @@ package com.worldcup.service;
 import com.worldcup.domain.Match;
 import com.worldcup.dto.MatchDto;
 import com.worldcup.exception.DuplicateMatchException;
-import com.worldcup.exception.TeamNotFoundException;
+import com.worldcup.exception.MatchNotFoundException;
 import com.worldcup.repository.MatchRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class MatchService {
 
     public Match findById(Long id) {
         return matchRepository.findById(id)
-            .orElseThrow(() -> new TeamNotFoundException("Match not found: " + id));
+            .orElseThrow(() -> new MatchNotFoundException("Match not found: " + id));
     }
 
     public void save(MatchDto dto) {
