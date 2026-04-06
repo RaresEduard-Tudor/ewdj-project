@@ -32,7 +32,7 @@
             <td th:text="${match.stadiumCode}"></td>
             <td>
                 <span th:if="${match.goalsA != null}" th:text="${match.goalsA} + ' – ' + ${match.goalsB}"></span>
-                <span th:if="${match.goalsA == null}" class="muted-note">TBD</span>
+                <span th:if="${match.goalsA == null}" class="muted-note" th:text="#{prediction.tbd}">TBD</span>
             </td>
             <td class="actions-cell">
                 <a th:href="@{/admin/matches/{id}/edit(id=${match.id})}"
