@@ -15,9 +15,14 @@
         </thead>
         <tbody>
         <tr th:each="entry, stat : ${scores}">
-            <td th:text="${stat.count}"></td>
+            <td>
+                <span th:if="${stat.count == 1}" class="medal medal--gold">&#127942;</span>
+                <span th:if="${stat.count == 2}" class="medal medal--silver">&#129352;</span>
+                <span th:if="${stat.count == 3}" class="medal medal--bronze">&#129353;</span>
+                <span th:if="${stat.count > 3}" class="rank-badge" th:text="${stat.count}"></span>
+            </td>
             <td th:text="${entry.key.username}"></td>
-            <td th:text="${entry.value}"></td>
+            <td class="pts-cell" th:text="${entry.value}"></td>
         </tr>
         </tbody>
     </table>

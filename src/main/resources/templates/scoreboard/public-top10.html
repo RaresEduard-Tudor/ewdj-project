@@ -20,8 +20,10 @@
         <tbody>
         <tr th:each="team, stat : ${teams}">
             <td>
-                <span th:class="${stat.count <= 3} ? 'rank-badge top3' : 'rank-badge'"
-                      th:text="${stat.count}"></span>
+                <span th:if="${stat.count == 1}" class="medal medal--gold">&#127942;</span>
+                <span th:if="${stat.count == 2}" class="medal medal--silver">&#129352;</span>
+                <span th:if="${stat.count == 3}" class="medal medal--bronze">&#129353;</span>
+                <span th:if="${stat.count > 3}" class="rank-badge" th:text="${stat.count}"></span>
             </td>
             <td th:text="${team.name}"></td>
             <td th:text="${#lists.size(team.members)}"></td>

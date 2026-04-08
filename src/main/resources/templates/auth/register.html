@@ -4,32 +4,44 @@
 <head><title th:text="#{register.title}">Register</title></head>
 <body>
 <th:block th:fragment="content">
-    <div class="card" style="max-width:400px;margin:0 auto">
-        <h1 th:text="#{register.title}">Create your account</h1>
-        <form th:action="@{/register}" th:object="${registrationDto}" method="post">
-            <div th:if="${#fields.hasGlobalErrors()}" class="error-msg" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
-            <label th:text="#{register.username.label}">Username</label>
-            <input type="text" th:field="*{username}"/>
-            <div class="error-msg" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+    <div class="auth-wrapper">
+        <div class="auth-hero">
+            <div class="auth-hero__trophy">&#127942;</div>
+            <div class="auth-hero__title" th:text="#{home.title}">FIFA World Cup 2026</div>
+            <div class="auth-hero__sub" th:text="#{home.subtitle}">Join the prediction game</div>
+        </div>
+        <div class="auth-form-side">
+            <div class="auth-form-box">
+                <h1 th:text="#{register.title}">Create your account</h1>
+                <p class="auth-subtitle" th:text="#{home.subtitle}">Predict, compete, and climb the rankings</p>
+                <form th:action="@{/register}" th:object="${registrationDto}" method="post">
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert-error"
+                         th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
 
-            <label th:text="#{register.email.label}">Email</label>
-            <input type="email" th:field="*{email}"/>
-            <div class="error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    <label th:text="#{register.username.label}">Username</label>
+                    <input type="text" th:field="*{username}" autocomplete="username"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
 
-            <label th:text="#{register.password.label}">Password</label>
-            <input type="password" th:field="*{password}"/>
-            <div class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    <label th:text="#{register.email.label}">Email</label>
+                    <input type="email" th:field="*{email}" autocomplete="email"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
 
-            <label th:text="#{register.confirm.label}">Confirm password</label>
-            <input type="password" th:field="*{confirmPassword}"/>
-            <div class="error-msg" th:if="${#fields.hasErrors('*')}" th:errors="*{*}"></div>
+                    <label th:text="#{register.password.label}">Password</label>
+                    <input type="password" th:field="*{password}" autocomplete="new-password"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
 
-            <button type="submit" class="btn" th:text="#{register.submit}">Register</button>
-        </form>
-        <p style="margin-top:12px">
-            <span th:text="#{register.already.account}">Already have an account?</span>
-            <a th:href="@{/login}" th:text="#{register.login.link}">Log in here</a>
-        </p>
+                    <label th:text="#{register.confirm.label}">Confirm password</label>
+                    <input type="password" th:field="*{confirmPassword}" autocomplete="new-password"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('*')}" th:errors="*{*}"></div>
+
+                    <button type="submit" class="btn" style="width:100%;margin-top:4px" th:text="#{register.submit}">Register</button>
+                </form>
+                <div class="auth-footer">
+                    <span th:text="#{register.already.account}">Already have an account?</span>
+                    <a th:href="@{/login}" th:text="#{register.login.link}">Log in here</a>
+                </div>
+            </div>
+        </div>
     </div>
 </th:block>
 </body>
