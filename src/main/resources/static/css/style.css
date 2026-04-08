@@ -488,6 +488,47 @@ tbody tr:hover td {
     white-space: nowrap;
 }
 
+/* ── Filter bar ────────────────────────────────────────────── */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-input {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 14px;
+    min-width: 0;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(232, 195, 58, .2);
+}
+
+.filter-input[type="text"] { flex: 1; min-width: 160px; }
+.filter-input[type="date"] { width: 160px; }
+select.filter-input { width: 150px; }
+
+.btn-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+    background: var(--navy2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.btn-sm:hover { background: var(--border); }
+
 /* ── Match cards (fixture list) ─────────────────────────────── */
 .match-card {
     background: var(--card-bg);

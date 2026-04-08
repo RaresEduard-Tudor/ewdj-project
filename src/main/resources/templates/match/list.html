@@ -11,11 +11,25 @@
     <div th:if="${predictionSuccess}" class="toast toast-success" th:text="#{${predictionSuccess}}"></div>
     <div th:if="${predictionError}"   class="toast toast-error"   th:text="#{${predictionError}}"></div>
 
+    <!-- Filters -->
+    <div th:if="${!#lists.isEmpty(matches)}" class="filter-bar">
+        <input type="text" id="filter-search" class="filter-input" placeholder="Search country..." oninput="applyFilters()"/>
+        <input type="date" id="filter-date" class="filter-input" oninput="applyFilters()"/>
+        <select id="filter-status" class="filter-input" onchange="applyFilters()">
+            <option value="" th:text="#{match.filter.all}">All</option>
+            <option value="upcoming" th:text="#{match.filter.upcoming}">Upcoming</option>
+            <option value="final" th:text="#{match.filter.final}">Final</option>
+        </select>
+        <button class="btn btn-sm" onclick="clearFilters()" th:text="#{match.filter.clear}">Clear</button>
+    </div>
+
     <div th:if="${#lists.isEmpty(matches)}" class="card">
         <p th:text="#{match.list.empty}">No matches scheduled yet.</p>
     </div>
 
-    <div th:if="${!#lists.isEmpty(matches)}">
+    <p id="no-filter-results" class="muted-note" style="display:none" th:text="#{match.filter.no.results}">No matches found.</p>
+
+    <div th:if="${!#lists.isEmpty(matches)}" id="matches-container">
         <div th:each="match : ${matches}"
              class="match-card match-card--clickable"
              th:attr="data-id=${match.id},
@@ -24,6 +38,7 @@
                       data-flag-a=${@flagUtil.get(match.countryA)},
                       data-flag-b=${@flagUtil.get(match.countryB)},
                       data-date=${#temporals.format(match.matchDate, 'dd MMM yyyy HH:mm')},
+                      data-iso-date=${#temporals.format(match.matchDate, 'yyyy-MM-dd')},
                       data-city=${match.city},
                       data-stadium=${match.stadium},
                       data-goals-a=${match.goalsA != null ? match.goalsA : ''},
@@ -185,6 +200,36 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeMatchModal();
         });
+
+        function applyFilters() {
+            const search = document.getElementById('filter-search').value.toLowerCase();
+            const date = document.getElementById('filter-date').value;
+            const status = document.getElementById('filter-status').value;
+            const cards = document.querySelectorAll('#matches-container .match-card');
+            let visible = 0;
+            cards.forEach(card => {
+                const d = card.dataset;
+                const matchesSearch = !search ||
+                    d.countryA.toLowerCase().includes(search) ||
+                    d.countryB.toLowerCase().includes(search);
+                const matchesDate = !date || d.isoDate === date;
+                const hasFinal = d.goalsA !== '' && d.goalsA !== undefined;
+                const matchesStatus = !status ||
+                    (status === 'final' && hasFinal) ||
+                    (status === 'upcoming' && !hasFinal);
+                const show = matchesSearch && matchesDate && matchesStatus;
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            document.getElementById('no-filter-results').style.display = visible === 0 ? 'block' : 'none';
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-search').value = '';
+            document.getElementById('filter-date').value = '';
+            document.getElementById('filter-status').value = '';
+            applyFilters();
+        }
     </script>
 </th:block>
 </body>
