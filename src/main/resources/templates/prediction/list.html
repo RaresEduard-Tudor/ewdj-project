@@ -31,7 +31,7 @@
             <td>
                 <span th:text="${@flagUtil.get(p.match.countryA)}"></span>
                 <span th:text="${p.match.countryA}"></span>
-                <span class="vs-sep">vs</span>
+                <span class="vs-sep" th:text="#{match.vs}">vs</span>
                 <span th:text="${@flagUtil.get(p.match.countryB)}"></span>
                 <span th:text="${p.match.countryB}"></span>
             </td>
@@ -72,7 +72,7 @@
                     <span id="edit-flag-a" style="font-size:36px"></span>
                     <span id="edit-country-a">Team A</span>
                 </div>
-                <div class="modal-score">vs</div>
+                <div class="modal-score" th:text="#{match.vs}">vs</div>
                 <div class="modal-team">
                     <span id="edit-flag-b" style="font-size:36px"></span>
                     <span id="edit-country-b">Team B</span>

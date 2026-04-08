@@ -12,7 +12,7 @@
                 <span th:text="${match.countryA}"></span>
             </div>
             <div class="match-hero__score"
-                 th:text="${match.goalsA != null} ? ${match.goalsA} + ' – ' + ${match.goalsB} : 'vs'">vs</div>
+                 th:text="${match.goalsA != null} ? ${match.goalsA} + ' – ' + ${match.goalsB} : #{match.vs}">vs</div>
             <div class="match-hero__team">
                 <span class="hero-flag" th:text="${@flagUtil.get(match.countryB)}"></span>
                 <span th:text="${match.countryB}"></span>

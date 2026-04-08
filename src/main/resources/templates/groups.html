@@ -52,7 +52,7 @@
                 <span class="next-fixture__match">
                     <span th:text="${@flagUtil.get(nextFixtures[entry.key].countryA)}"></span>
                     <span th:text="${nextFixtures[entry.key].countryA}"></span>
-                    <span class="vs-sep">vs</span>
+                    <span class="vs-sep" th:text="#{match.vs}">vs</span>
                     <span th:text="${@flagUtil.get(nextFixtures[entry.key].countryB)}"></span>
                     <span th:text="${nextFixtures[entry.key].countryB}"></span>
                 </span>

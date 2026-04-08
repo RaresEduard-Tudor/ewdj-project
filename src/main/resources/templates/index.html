@@ -41,7 +41,7 @@
                     <span th:text="${@flagUtil.get(match.countryA)}"></span>
                     <span th:text="${match.countryA}"></span>
                 </span>
-                <span class="vs-badge">vs</span>
+                <span class="vs-badge" th:text="#{match.vs}">vs</span>
                 <span class="team-name">
                     <span th:text="${@flagUtil.get(match.countryB)}"></span>
                     <span th:text="${match.countryB}"></span>

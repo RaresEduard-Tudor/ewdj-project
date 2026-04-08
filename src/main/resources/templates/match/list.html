@@ -56,7 +56,7 @@
                     <span th:text="${match.countryA}"></span>
                 </span>
                 <span class="vs-badge"
-                      th:text="${match.goalsA != null} ? ${match.goalsA} + ' – ' + ${match.goalsB} : 'vs'"></span>
+                      th:text="${match.goalsA != null} ? ${match.goalsA} + ' – ' + ${match.goalsB} : #{match.vs}"></span>
                 <span class="team-name">
                     <span th:text="${@flagUtil.get(match.countryB)}"></span>
                     <span th:text="${match.countryB}"></span>
@@ -81,7 +81,7 @@
 
             <div class="modal-hero">
                 <div class="modal-team" id="modal-team-a"></div>
-                <div class="modal-score" id="modal-score">vs</div>
+                <div class="modal-score" id="modal-score" th:text="#{match.vs}">vs</div>
                 <div class="modal-team" id="modal-team-b"></div>
             </div>
 
