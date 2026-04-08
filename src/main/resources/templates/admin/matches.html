@@ -72,12 +72,12 @@
                     <div class="prediction-inputs">
                         <div class="prediction-input-group">
                             <label id="rm-label-a">A</label>
-                            <input type="number" name="goalsA" id="rm-input-a" min="0" class="goal-input" required/>
+                            <input type="number" name="goalsA" id="rm-input-a" min="0" value="0" class="goal-input" required/>
                         </div>
                         <div class="prediction-sep">–</div>
                         <div class="prediction-input-group">
                             <label id="rm-label-b">B</label>
-                            <input type="number" name="goalsB" id="rm-input-b" min="0" class="goal-input" required/>
+                            <input type="number" name="goalsB" id="rm-input-b" min="0" value="0" class="goal-input" required/>
                         </div>
                     </div>
                     <div class="result-modal__actions">
@@ -97,8 +97,8 @@
             document.getElementById('rm-date').textContent = d.date;
             document.getElementById('rm-label-a').textContent = d.countryA;
             document.getElementById('rm-label-b').textContent = d.countryB;
-            document.getElementById('rm-input-a').value = '';
-            document.getElementById('rm-input-b').value = '';
+            document.getElementById('rm-input-a').value = 0;
+            document.getElementById('rm-input-b').value = 0;
             document.getElementById('result-form').action = '/admin/matches/' + d.id + '/result';
             document.getElementById('result-modal').classList.add('open');
             document.getElementById('rm-input-a').focus();

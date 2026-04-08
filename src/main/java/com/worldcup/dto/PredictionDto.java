@@ -9,11 +9,11 @@ public class PredictionDto {
 
     @NotNull
     @Min(0)
-    private Integer goalsA;
+    private Integer goalsA = 0;
 
     @NotNull
     @Min(0)
-    private Integer goalsB;
+    private Integer goalsB = 0;
 
     public Long getMatchId() { return matchId; }
     public void setMatchId(Long matchId) { this.matchId = matchId; }

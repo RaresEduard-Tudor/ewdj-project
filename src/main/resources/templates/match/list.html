@@ -88,12 +88,12 @@
                         <div class="prediction-inputs">
                             <div class="prediction-input-group">
                                 <label id="modal-label-a">Team A</label>
-                                <input type="number" name="goalsA" id="modal-input-a" min="0" class="goal-input" required/>
+                                <input type="number" name="goalsA" id="modal-input-a" min="0" value="0" class="goal-input" required/>
                             </div>
                             <div class="prediction-sep">–</div>
                             <div class="prediction-input-group">
                                 <label id="modal-label-b">Team B</label>
-                                <input type="number" name="goalsB" id="modal-input-b" min="0" class="goal-input" required/>
+                                <input type="number" name="goalsB" id="modal-input-b" min="0" value="0" class="goal-input" required/>
                             </div>
                         </div>
                         <button type="submit" class="btn" th:text="#{match.detail.prediction.submit}">Submit Prediction</button>
@@ -154,8 +154,8 @@
             const inputB = document.getElementById('modal-input-b');
             if (labelA) labelA.textContent = d.countryA;
             if (labelB) labelB.textContent = d.countryB;
-            if (inputA) inputA.value = hasPrediction ? d.predA : '';
-            if (inputB) inputB.value = hasPrediction ? d.predB : '';
+            if (inputA) inputA.value = hasPrediction ? d.predA : 0;
+            if (inputB) inputB.value = hasPrediction ? d.predB : 0;
 
             const form = document.getElementById('modal-predict-form');
             if (form) form.action = '/matches/' + d.id + '/predict';
