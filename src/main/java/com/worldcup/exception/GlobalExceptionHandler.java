@@ -1,10 +1,12 @@
 package com.worldcup.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 @Slf4j
@@ -33,6 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MatchNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleMatchNotFound(MatchNotFoundException ex, Model model) {
         log.warn("Match not found: {}", ex.getMessage());
         model.addAttribute("error", ex.getMessage());
@@ -47,6 +50,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public String handleAccessDenied(AccessDeniedException ex, Model model) {
         log.warn("Access denied: {}", ex.getMessage());
         model.addAttribute("error", "You do not have permission to access this page.");

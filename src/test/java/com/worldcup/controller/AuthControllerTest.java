@@ -2,14 +2,20 @@ package com.worldcup.controller;
 
 import com.worldcup.config.PasswordEncoderConfig;
 import com.worldcup.config.SecurityConfig;
+import com.worldcup.exception.DuplicateUsernameException;
 import com.worldcup.interceptor.AdminAuditInterceptor;
 import com.worldcup.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,6 +32,11 @@ class AuthControllerTest {
 
     @MockitoBean
     AdminAuditInterceptor adminAuditInterceptor;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        when(adminAuditInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+    }
 
     @Test
     void registerPage_shouldReturn200() throws Exception {
@@ -74,5 +85,46 @@ class AuthControllerTest {
                 .param("confirmPassword", "password123")
                 .with(csrf()))
             .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void registerPage_shouldHaveRegistrationDtoModel() throws Exception {
+        mockMvc.perform(get("/register"))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeExists("registrationDto"));
+    }
+
+    @Test
+    void registerPost_withBlankUsername_shouldReturnFormWithErrors() throws Exception {
+        mockMvc.perform(post("/register")
+                .param("username", "")
+                .param("email", "user@example.com")
+                .param("password", "password123")
+                .param("confirmPassword", "password123")
+                .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeHasErrors("registrationDto"));
+    }
+
+    @Test
+    void registerPost_whenDuplicateUsername_shouldReturnFormWithError() throws Exception {
+        doThrow(new DuplicateUsernameException("Username taken"))
+            .when(userService).register(any());
+
+        mockMvc.perform(post("/register")
+                .param("username", "alice")
+                .param("email", "alice@example.com")
+                .param("password", "password123")
+                .param("confirmPassword", "password123")
+                .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeHasErrors("registrationDto"));
+    }
+
+    @Test
+    void loginPage_shouldHaveNoModelErrors() throws Exception {
+        mockMvc.perform(get("/login"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("auth/login"));
     }
 }
