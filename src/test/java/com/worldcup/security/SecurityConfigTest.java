@@ -152,4 +152,71 @@ class SecurityConfigTest {
         mockMvc.perform(get("/predictions"))
             .andExpect(status().isOk());
     }
+
+    // ── POST to protected endpoints while anonymous redirects to login ──
+
+    @Test
+    void postToTeamCreate_whenAnonymous_shouldRedirectToLogin() throws Exception {
+        mockMvc.perform(post("/team/create")
+                .param("name", "Test Team")
+                .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrlPattern("**/login"));
+    }
+
+    @Test
+    void postToTeamJoin_whenAnonymous_shouldRedirectToLogin() throws Exception {
+        mockMvc.perform(post("/team/join")
+                .param("inviteCode", "ABCD1234")
+                .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrlPattern("**/login"));
+    }
+
+    @Test
+    void postToPredict_whenAnonymous_shouldRedirectToLogin() throws Exception {
+        mockMvc.perform(post("/matches/1/predict")
+                .param("goalsA", "2")
+                .param("goalsB", "1")
+                .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrlPattern("**/login"));
+    }
+
+    // ── Admin POST endpoints forbidden for USER role ──
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void postAdminSaveMatch_asUser_shouldBeForbidden() throws Exception {
+        mockMvc.perform(post("/admin/matches")
+                .param("countryA", "Brazil")
+                .param("countryB", "France")
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void postAdminDeleteMatch_asUser_shouldBeForbidden() throws Exception {
+        mockMvc.perform(post("/admin/matches/1/delete").with(csrf()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void postAdminResult_asUser_shouldBeForbidden() throws Exception {
+        mockMvc.perform(post("/admin/matches/1/result")
+                .param("goalsA", "1")
+                .param("goalsB", "0")
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+    }
+
+    // ── Static resources are publicly accessible ──
+
+    @Test
+    void cssResource_whenAnonymous_shouldBeOk() throws Exception {
+        mockMvc.perform(get("/css/style.css"))
+            .andExpect(status().isOk());
+    }
 }

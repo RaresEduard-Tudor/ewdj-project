@@ -33,6 +33,7 @@ public class AuthController {
         return "auth/register";
     }
 
+    @SuppressWarnings("null")
     @PostMapping("/register")
     public String register(@Valid @ModelAttribute("registrationDto") RegistrationDto dto,
                            BindingResult bindingResult) {
