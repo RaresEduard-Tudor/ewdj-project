@@ -23,8 +23,9 @@
         <button class="btn btn-sm" onclick="clearFilters()" th:text="#{match.filter.clear}">Clear</button>
     </div>
 
-    <div th:if="${#lists.isEmpty(matches)}" class="card">
-        <p th:text="#{match.list.empty}">No matches scheduled yet.</p>
+    <div th:if="${#lists.isEmpty(matches)}" class="empty-state">
+        <span class="empty-state__icon">⚽</span>
+        <div class="empty-state__title" th:text="#{match.list.empty}">No matches scheduled yet.</div>
     </div>
 
     <p id="no-filter-results" class="muted-note" style="display:none" th:text="#{match.filter.no.results}">No matches found.</p>

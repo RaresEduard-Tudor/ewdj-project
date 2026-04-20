@@ -53,5 +53,15 @@
 <div class="container">
     <div th:replace="${content}"><!-- page content --></div>
 </div>
+
+<script>
+    // Form submit loading state: adds .loading to the submit button after click
+    document.addEventListener('submit', e => {
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (btn && !btn.classList.contains('no-loading')) {
+            setTimeout(() => btn.classList.add('loading'), 0);
+        }
+    });
+</script>
 </body>
 </html>

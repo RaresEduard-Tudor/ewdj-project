@@ -23,7 +23,11 @@
         </a>
     </div>
 
-    <p th:if="${#lists.isEmpty(myTeams)}" class="muted-note" th:text="#{team.list.empty}">You are not in any team yet.</p>
+    <div th:if="${#lists.isEmpty(myTeams)}" class="empty-state">
+        <span class="empty-state__icon">👥</span>
+        <div class="empty-state__title" th:text="#{team.list.empty}">You are not in any team yet.</div>
+        <div class="empty-state__text" th:text="#{team.list.empty.hint}">Create your own team or join one with an invite code below.</div>
+    </div>
 
     <!-- Create & Join forms side by side -->
     <div class="team-actions-row">

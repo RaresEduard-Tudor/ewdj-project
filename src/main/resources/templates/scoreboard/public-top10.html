@@ -5,8 +5,10 @@
 <body>
 <th:block th:fragment="content">
     <h1 th:text="#{nav.top10}">Public Top 10</h1>
-    <div th:if="${#lists.isEmpty(teams)}" class="card">
-        <p th:text="#{top10.empty}">No teams yet.</p>
+    <div th:if="${#lists.isEmpty(teams)}" class="empty-state">
+        <span class="empty-state__icon">🏆</span>
+        <div class="empty-state__title" th:text="#{top10.empty}">No teams yet.</div>
+        <div class="empty-state__text" th:text="#{top10.empty.hint}">Be the first to create a team and climb the leaderboard.</div>
     </div>
     <table th:if="${!#lists.isEmpty(teams)}" class="card">
         <thead>

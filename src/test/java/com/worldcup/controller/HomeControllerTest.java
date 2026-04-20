@@ -3,6 +3,8 @@ package com.worldcup.controller;
 import com.worldcup.config.PasswordEncoderConfig;
 import com.worldcup.config.SecurityConfig;
 import com.worldcup.interceptor.AdminAuditInterceptor;
+import com.worldcup.repository.PredictionRepository;
+import com.worldcup.repository.TeamRepository;
 import com.worldcup.service.MatchService;
 import com.worldcup.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,12 @@ class HomeControllerTest {
 
     @MockitoBean
     UserService userService;
+
+    @MockitoBean
+    PredictionRepository predictionRepository;
+
+    @MockitoBean
+    TeamRepository teamRepository;
 
     @MockitoBean
     AdminAuditInterceptor adminAuditInterceptor;
