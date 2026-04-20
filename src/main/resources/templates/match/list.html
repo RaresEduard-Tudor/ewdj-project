@@ -64,9 +64,9 @@
                 </span>
             </div>
             <div class="match-card__meta">
-                <span th:text="${match.city}"></span>
+                <span th:text="${match.stadium}"></span>
                 <span class="dot">·</span>
-                <span th:text="${match.stadiumCode}"></span>
+                <span th:text="${match.city}"></span>
             </div>
             <div class="match-card__action">
                 <span th:if="${match.goalsA != null}" class="badge badge-done" th:text="#{badge.final}">Final</span>
