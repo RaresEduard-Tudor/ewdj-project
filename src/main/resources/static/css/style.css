@@ -1328,68 +1328,90 @@ code.invite-code {
     text-decoration: underline;
 }
 
-/* ── Admin result modal ────────────────────────────────────── */
-.result-modal-overlay {
+/* ── Admin match drawer ─────────────────────────────────────── */
+.admin-match-table tbody tr.admin-match-row {
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.admin-match-table tbody tr.admin-match-row:hover { background: var(--blue-lt); }
+.admin-match-table tbody tr.admin-match-row.active { background: #eff6ff; outline: 2px solid var(--blue); outline-offset: -2px; }
+
+.admin-drawer-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.55);
+    background: rgba(0,0,0,.5);
     z-index: 1000;
+    backdrop-filter: blur(6px);
     align-items: center;
     justify-content: center;
     padding: 20px;
-    backdrop-filter: blur(8px);
 }
+.admin-drawer-overlay.open { display: flex; }
 
-.result-modal-overlay.open { display: flex; }
-
-.result-modal {
-    background: #fff;
-    border-radius: 14px;
-    width: 100%;
-    max-width: 400px;
-    overflow: hidden;
+.admin-drawer {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
     box-shadow: 0 24px 64px rgba(0,0,0,.3);
+    width: 100%;
+    max-width: 420px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
     animation: modal-in .18s ease;
 }
 
-.result-modal__header {
-    background: linear-gradient(135deg, var(--navy) 0%, #162032 100%);
-    padding: 20px 24px;
-    text-align: center;
+.admin-drawer__header {
+    background: var(--gradient-hero);
+    padding: 20px 20px 18px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
 }
-
-.result-modal__teams {
-    font-size: 16px;
+.admin-drawer__teams {
+    font-size: 15px;
     font-weight: 700;
     color: #fff;
+    line-height: 1.3;
 }
-
-.result-modal__date {
+.admin-drawer__meta {
     font-size: 12px;
-    color: rgba(255,255,255,.5);
-    margin-top: 4px;
+    color: rgba(255,255,255,.55);
+    margin-top: 5px;
 }
-
-.result-modal__body {
-    padding: 24px;
+.admin-drawer__close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.6);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color var(--transition);
 }
+.admin-drawer__close:hover { color: #fff; }
 
-.result-modal__body .prediction-inputs {
-    margin-bottom: 20px;
+.admin-drawer__section {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
 }
-
-.result-modal__body .goal-input {
+.admin-drawer__section:last-child { border-bottom: none; }
+.admin-drawer__section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin-bottom: 14px;
+}
+.admin-drawer__section .goal-input {
     width: 80px !important;
     font-size: 28px !important;
     font-weight: 800;
     padding: 12px 8px !important;
-}
-
-.result-modal__actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */
