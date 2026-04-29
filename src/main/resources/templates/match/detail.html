@@ -23,6 +23,10 @@
             <span>📍 <span th:text="${match.stadium}"></span> · <span th:text="${match.city}"></span></span>
             <span th:if="${stadiumCapacity != null}">🏟️ <span th:text="#{match.detail.capacity(${stadiumCapacity})}"></span></span>
         </div>
+        <div sec:authorize="hasRole('ADMIN')" style="margin-top:16px">
+            <a th:href="@{/admin/matches/{id}/edit(id=${match.id})}" class="btn btn-sm"
+               th:text="#{match.admin.edit}">Edit Match</a>
+        </div>
     </div>
 
     <div class="card" sec:authorize="isAuthenticated()">
