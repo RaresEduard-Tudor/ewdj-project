@@ -3,6 +3,8 @@ package com.worldcup.controller;
 import com.worldcup.domain.Match;
 import com.worldcup.dto.TeamStandingDto;
 import com.worldcup.service.MatchService;
+import com.worldcup.util.CountryRegistry;
+import com.worldcup.util.CountryRegistry.Country;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,87 +18,11 @@ import java.util.stream.Collectors;
 public class GroupsController {
 
     private final MatchService matchService;
+    private final CountryRegistry countryRegistry;
 
-    public GroupsController(MatchService matchService) {
+    public GroupsController(MatchService matchService, CountryRegistry countryRegistry) {
         this.matchService = matchService;
-    }
-
-    // [teamName, flagEmoji] — order determines initial table row before any results
-    private static final Map<String, List<String[]>> GROUPS = new LinkedHashMap<>();
-
-    static {
-        GROUPS.put("A", List.of(
-            new String[]{"Mexico",       "🇲🇽"},
-            new String[]{"South Africa", "🇿🇦"},
-            new String[]{"South Korea",  "🇰🇷"},
-            new String[]{"Czechia",      "🇨🇿"}
-        ));
-        GROUPS.put("B", List.of(
-            new String[]{"Canada",       "🇨🇦"},
-            new String[]{"Bosnia",       "🇧🇦"},
-            new String[]{"Qatar",        "🇶🇦"},
-            new String[]{"Switzerland",  "🇨🇭"}
-        ));
-        GROUPS.put("C", List.of(
-            new String[]{"Brazil",       "🇧🇷"},
-            new String[]{"Morocco",      "🇲🇦"},
-            new String[]{"Haiti",        "🇭🇹"},
-            new String[]{"Scotland",     "🏴󠁧󠁢󠁳󠁣󠁴󠁿"}
-        ));
-        GROUPS.put("D", List.of(
-            new String[]{"USA",          "🇺🇸"},
-            new String[]{"Paraguay",     "🇵🇾"},
-            new String[]{"Australia",    "🇦🇺"},
-            new String[]{"Turkey",       "🇹🇷"}
-        ));
-        GROUPS.put("E", List.of(
-            new String[]{"Germany",       "🇩🇪"},
-            new String[]{"Curacao",       "🇨🇼"},
-            new String[]{"Cote d'Ivoire", "🇨🇮"},
-            new String[]{"Ecuador",       "🇪🇨"}
-        ));
-        GROUPS.put("F", List.of(
-            new String[]{"Netherlands",  "🇳🇱"},
-            new String[]{"Japan",        "🇯🇵"},
-            new String[]{"Sweden",       "🇸🇪"},
-            new String[]{"Tunisia",      "🇹🇳"}
-        ));
-        GROUPS.put("G", List.of(
-            new String[]{"Belgium",      "🇧🇪"},
-            new String[]{"Egypt",        "🇪🇬"},
-            new String[]{"IR Iran",      "🇮🇷"},
-            new String[]{"New Zealand",  "🇳🇿"}
-        ));
-        GROUPS.put("H", List.of(
-            new String[]{"Spain",        "🇪🇸"},
-            new String[]{"Cabo Verde",   "🇨🇻"},
-            new String[]{"Saudi Arabia", "🇸🇦"},
-            new String[]{"Uruguay",      "🇺🇾"}
-        ));
-        GROUPS.put("I", List.of(
-            new String[]{"France",       "🇫🇷"},
-            new String[]{"Senegal",      "🇸🇳"},
-            new String[]{"Iraq",         "🇮🇶"},
-            new String[]{"Norway",       "🇳🇴"}
-        ));
-        GROUPS.put("J", List.of(
-            new String[]{"Argentina",    "🇦🇷"},
-            new String[]{"Algeria",      "🇩🇿"},
-            new String[]{"Austria",      "🇦🇹"},
-            new String[]{"Jordan",       "🇯🇴"}
-        ));
-        GROUPS.put("K", List.of(
-            new String[]{"Portugal",     "🇵🇹"},
-            new String[]{"Congo",        "🇨🇩"},
-            new String[]{"Uzbekistan",   "🇺🇿"},
-            new String[]{"Colombia",     "🇨🇴"}
-        ));
-        GROUPS.put("L", List.of(
-            new String[]{"England",      "🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
-            new String[]{"Croatia",      "🇭🇷"},
-            new String[]{"Ghana",        "🇬🇭"},
-            new String[]{"Panama",       "🇵🇦"}
-        ));
+        this.countryRegistry = countryRegistry;
     }
 
     @GetMapping("/groups")
@@ -106,18 +32,17 @@ public class GroupsController {
         Map<String, List<TeamStandingDto>> standings = new LinkedHashMap<>();
         Map<String, Match> nextFixtures = new LinkedHashMap<>();
 
-        for (Map.Entry<String, List<String[]>> entry : GROUPS.entrySet()) {
+        for (Map.Entry<String, List<Country>> entry : countryRegistry.getGroups().entrySet()) {
             String groupKey = entry.getKey();
-            List<String[]> teams = entry.getValue();
+            List<Country> teams = entry.getValue();
 
             Set<String> teamNames = teams.stream()
-                .map(t -> t[0])
+                .map(Country::name)
                 .collect(Collectors.toSet());
 
-            // Initialise one standing row per team (preserves draw order)
             Map<String, TeamStandingDto> standingMap = new LinkedHashMap<>();
-            for (String[] team : teams) {
-                standingMap.put(team[0], new TeamStandingDto(team[0], team[1]));
+            for (Country team : teams) {
+                standingMap.put(team.name(), new TeamStandingDto(team.name(), team.flag()));
             }
 
             Match nextFixture = null;

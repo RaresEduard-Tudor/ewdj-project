@@ -2,12 +2,16 @@ package com.worldcup.service;
 
 import com.worldcup.domain.Match;
 import com.worldcup.domain.Prediction;
+import com.worldcup.domain.Team;
 import com.worldcup.repository.PredictionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -30,44 +34,44 @@ public class ScoringService {
 
         List<Prediction> predictions = predictionRepository.findByMatch(match);
 
+        Map<Long, Boolean> exactByPrediction = new HashMap<>();
+        Map<Long, Boolean> outcomeByPrediction = new HashMap<>();
+        Map<Long, Long> teamExactCount = new HashMap<>();
+        Map<Long, Long> teamOutcomeCount = new HashMap<>();
+
+        for (Prediction p : predictions) {
+            boolean exact = isExact(p, match);
+            boolean outcome = isOutcomeCorrect(p, match);
+            exactByPrediction.put(p.getId(), exact);
+            outcomeByPrediction.put(p.getId(), outcome);
+            for (Team team : p.getUser().getTeams()) {
+                if (exact) teamExactCount.merge(team.getId(), 1L, Long::sum);
+                if (outcome) teamOutcomeCount.merge(team.getId(), 1L, Long::sum);
+            }
+        }
+
         for (Prediction p : predictions) {
             int points = 0;
-            boolean exactCorrect = isExact(p, match);
-            boolean outcomeCorrect = isOutcomeCorrect(p, match);
-
-            if (exactCorrect) {
+            boolean exact = exactByPrediction.getOrDefault(p.getId(), false);
+            boolean outcome = outcomeByPrediction.getOrDefault(p.getId(), false);
+            if (exact) {
                 points += X;
-                if (isSoleExactInAnyTeam(p, predictions)) points += B;
-            } else if (outcomeCorrect) {
+                if (isSoleInAnyTeam(p, teamExactCount)) points += B;
+            } else if (outcome) {
                 points += Y;
-                if (isSoleOutcomeInAnyTeam(p, predictions, match)) points += C;
+                if (isSoleInAnyTeam(p, teamOutcomeCount)) points += C;
             }
-
             p.setPointsAwarded(points);
-            predictionRepository.save(p);
-            log.info("User {} scored {} points for match {}",
+            log.debug("User {} scored {} points for match {}",
                 p.getUser().getUsername(), points, match.getId());
         }
+
+        predictionRepository.saveAll(predictions);
     }
 
-    private boolean isSoleExactInAnyTeam(Prediction target, List<Prediction> allPredictions) {
-        return target.getUser().getTeams().stream().anyMatch(team -> {
-            long exactInTeam = allPredictions.stream()
-                .filter(p -> team.getMembers().contains(p.getUser()))
-                .filter(p -> isExact(p, target.getMatch()))
-                .count();
-            return exactInTeam == 1;
-        });
-    }
-
-    private boolean isSoleOutcomeInAnyTeam(Prediction target, List<Prediction> allPredictions, Match match) {
-        return target.getUser().getTeams().stream().anyMatch(team -> {
-            long correctInTeam = allPredictions.stream()
-                .filter(p -> team.getMembers().contains(p.getUser()))
-                .filter(p -> isOutcomeCorrect(p, match))
-                .count();
-            return correctInTeam == 1;
-        });
+    private boolean isSoleInAnyTeam(Prediction target, Map<Long, Long> teamCounts) {
+        return target.getUser().getTeams().stream()
+            .anyMatch(t -> teamCounts.getOrDefault(t.getId(), 0L) == 1L);
     }
 
     private boolean isExact(Prediction p, Match m) {

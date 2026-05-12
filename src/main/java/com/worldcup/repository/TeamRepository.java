@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByInviteCode(String inviteCode);
     Optional<Team> findByName(String name);
+    boolean existsByInviteCode(String inviteCode);
     long countByMembersContaining(User user);
 
     @Query("SELECT t FROM Team t LEFT JOIN t.members m LEFT JOIN Prediction p ON p.user = m " +

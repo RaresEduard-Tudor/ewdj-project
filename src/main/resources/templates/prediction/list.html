@@ -42,7 +42,7 @@
             <td><strong th:text="${p.predictedGoalsA} + ' – ' + ${p.predictedGoalsB}"></strong></td>
             <td th:text="${p.match.goalsA != null} ? ${p.match.goalsA} + ' – ' + ${p.match.goalsB} : #{prediction.tbd}">TBD</td>
             <td>
-                <span th:if="${p.pointsAwarded != null}" class="points-badge" th:text="${p.pointsAwarded} + ' pts'"></span>
+                <span th:if="${p.pointsAwarded != null}" class="points-badge" th:text="${p.pointsAwarded} + ' ' + #{points.badge}"></span>
                 <span th:if="${p.pointsAwarded == null}" class="muted-note">–</span>
             </td>
             <td>

@@ -1,7 +1,9 @@
 package com.worldcup.service;
 
+import com.worldcup.domain.Role;
 import com.worldcup.domain.User;
 import com.worldcup.dto.RegistrationDto;
+import com.worldcup.exception.DuplicateEmailException;
 import com.worldcup.exception.DuplicateUsernameException;
 import com.worldcup.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +38,7 @@ class UserServiceTest {
         existingUser.setUsername("alice");
         existingUser.setEmail("alice@example.com");
         existingUser.setPassword("encoded");
-        existingUser.setRole("ROLE_USER");
+        existingUser.setRole(Role.USER);
     }
 
     @Test
@@ -80,7 +82,7 @@ class UserServiceTest {
         dto.setPassword("secret123");
 
         userService.register(dto);
-        verify(userRepository).save(argThat(u -> u.getUsername().equals("bob") && u.getRole().equals("ROLE_USER")));
+        verify(userRepository).save(argThat(u -> u.getUsername().equals("bob") && u.getRole() == Role.USER));
     }
 
     @Test
@@ -108,7 +110,7 @@ class UserServiceTest {
         dto.setPassword("password123");
 
         assertThatThrownBy(() -> userService.register(dto))
-            .isInstanceOf(DuplicateUsernameException.class);
+            .isInstanceOf(DuplicateEmailException.class);
         verify(userRepository, never()).save(any());
     }
 }

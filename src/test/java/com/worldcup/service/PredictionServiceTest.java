@@ -11,10 +11,10 @@ import com.worldcup.repository.PredictionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,8 @@ class PredictionServiceTest {
 
     @Mock MatchRepository matchRepository;
     @Mock PredictionRepository predictionRepository;
-    @InjectMocks PredictionService predictionService;
+
+    PredictionService predictionService;
 
     private User user;
     private Match futureMatch;
@@ -36,6 +37,8 @@ class PredictionServiceTest {
 
     @BeforeEach
     void setUp() {
+        predictionService = new PredictionService(matchRepository, predictionRepository, Clock.systemDefaultZone());
+
         user = new User();
         user.setId(1L);
         user.setUsername("testuser");
@@ -59,11 +62,10 @@ class PredictionServiceTest {
         when(predictionRepository.findByUserAndMatch(user, futureMatch)).thenReturn(Optional.empty());
 
         PredictionDto dto = new PredictionDto();
-        dto.setMatchId(1L);
         dto.setGoalsA(2);
         dto.setGoalsB(1);
 
-        predictionService.savePrediction(dto, user);
+        predictionService.savePrediction(1L, dto, user);
 
         verify(predictionRepository).save(argThat(p ->
             p.getPredictedGoalsA() == 2 && p.getPredictedGoalsB() == 1
@@ -81,11 +83,10 @@ class PredictionServiceTest {
         when(predictionRepository.findByUserAndMatch(user, futureMatch)).thenReturn(Optional.of(existing));
 
         PredictionDto dto = new PredictionDto();
-        dto.setMatchId(1L);
         dto.setGoalsA(3);
         dto.setGoalsB(2);
 
-        predictionService.savePrediction(dto, user);
+        predictionService.savePrediction(1L, dto, user);
 
         verify(predictionRepository).save(argThat(p ->
             p.getId().equals(99L) && p.getPredictedGoalsA() == 3 && p.getPredictedGoalsB() == 2));
@@ -96,11 +97,10 @@ class PredictionServiceTest {
         when(matchRepository.findById(2L)).thenReturn(Optional.of(pastMatch));
 
         PredictionDto dto = new PredictionDto();
-        dto.setMatchId(2L);
         dto.setGoalsA(1);
         dto.setGoalsB(0);
 
-        assertThatThrownBy(() -> predictionService.savePrediction(dto, user))
+        assertThatThrownBy(() -> predictionService.savePrediction(2L, dto, user))
             .isInstanceOf(PredictionDeadlineException.class);
         verify(predictionRepository, never()).save(any());
     }
@@ -110,11 +110,10 @@ class PredictionServiceTest {
         when(matchRepository.findById(99L)).thenReturn(Optional.empty());
 
         PredictionDto dto = new PredictionDto();
-        dto.setMatchId(99L);
         dto.setGoalsA(1);
         dto.setGoalsB(0);
 
-        assertThatThrownBy(() -> predictionService.savePrediction(dto, user))
+        assertThatThrownBy(() -> predictionService.savePrediction(99L, dto, user))
             .isInstanceOf(MatchNotFoundException.class);
         verify(predictionRepository, never()).save(any());
     }
@@ -143,11 +142,10 @@ class PredictionServiceTest {
         when(predictionRepository.findByUserAndMatch(user, nearDeadlineMatch)).thenReturn(Optional.empty());
 
         PredictionDto dto = new PredictionDto();
-        dto.setMatchId(3L);
         dto.setGoalsA(1);
         dto.setGoalsB(1);
 
-        predictionService.savePrediction(dto, user);
+        predictionService.savePrediction(3L, dto, user);
 
         verify(predictionRepository).save(any(Prediction.class));
     }

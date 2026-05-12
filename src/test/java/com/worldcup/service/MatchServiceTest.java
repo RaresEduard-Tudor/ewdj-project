@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 class MatchServiceTest {
 
     @Mock MatchRepository matchRepository;
+    @Mock ScoringService scoringService;
     @InjectMocks MatchService matchService;
 
     private Match sampleMatch;
@@ -63,8 +64,6 @@ class MatchServiceTest {
 
     @Test
     void save_whenNoDuplicate_shouldPersist() {
-        when(matchRepository.findAll()).thenReturn(List.of());
-
         MatchDto dto = new MatchDto();
         dto.setCountryA("Germany");
         dto.setCountryB("Spain");
@@ -73,12 +72,14 @@ class MatchServiceTest {
         dto.setStadiumCode("2345");
 
         matchService.save(dto);
+
         verify(matchRepository).save(any(Match.class));
     }
 
     @Test
     void save_whenDuplicateStadiumAndTime_shouldThrow() {
-        when(matchRepository.findAll()).thenReturn(List.of(sampleMatch));
+        when(matchRepository.existsByStadiumAndMatchDate(sampleMatch.getStadium(), sampleMatch.getMatchDate()))
+            .thenReturn(true);
 
         MatchDto dto = new MatchDto();
         dto.setCountryA("Portugal");
@@ -92,12 +93,28 @@ class MatchServiceTest {
     }
 
     @Test
-    void saveResult_shouldUpdateGoals() {
+    void save_whenEditingMissingMatch_shouldThrow() {
+        when(matchRepository.findById(99L)).thenReturn(Optional.empty());
+
+        MatchDto dto = new MatchDto();
+        dto.setId(99L);
+        dto.setCountryA("Brazil");
+        dto.setCountryB("Italy");
+        dto.setMatchDate(LocalDateTime.of(2026, 6, 25, 15, 0));
+
+        assertThatThrownBy(() -> matchService.save(dto))
+            .isInstanceOf(MatchNotFoundException.class);
+        verify(matchRepository, never()).save(any());
+    }
+
+    @Test
+    void saveResult_shouldUpdateGoalsAndTriggerScoring() {
         when(matchRepository.findById(1L)).thenReturn(Optional.of(sampleMatch));
 
         matchService.saveResult(1L, 2, 1);
 
         verify(matchRepository).save(argThat(m -> m.getGoalsA() == 2 && m.getGoalsB() == 1));
+        verify(scoringService).calculateScoresForMatch(sampleMatch);
     }
 
     @Test

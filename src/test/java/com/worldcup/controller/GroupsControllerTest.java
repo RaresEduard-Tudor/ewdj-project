@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(GroupsController.class)
-@Import({SecurityConfig.class, PasswordEncoderConfig.class})
+@Import({SecurityConfig.class, PasswordEncoderConfig.class, com.worldcup.util.CountryRegistry.class})
 class GroupsControllerTest {
 
     @Autowired MockMvc mockMvc;

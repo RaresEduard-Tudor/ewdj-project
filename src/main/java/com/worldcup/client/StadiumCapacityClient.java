@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
 
 @Component
 @Slf4j
@@ -22,7 +23,7 @@ public class StadiumCapacityClient {
                 .retrieve()
                 .bodyToMono(Integer.class)
                 .block();
-        } catch (Exception e) {
+        } catch (WebClientException e) {
             log.warn("Could not fetch capacity for stadiumCode {}: {}", stadiumCode, e.getMessage());
             return null;
         }

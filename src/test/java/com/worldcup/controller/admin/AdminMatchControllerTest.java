@@ -6,7 +6,6 @@ import com.worldcup.domain.Match;
 import com.worldcup.exception.DuplicateMatchException;
 import com.worldcup.interceptor.AdminAuditInterceptor;
 import com.worldcup.service.MatchService;
-import com.worldcup.service.ScoringService;
 import com.worldcup.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -40,9 +38,6 @@ class AdminMatchControllerTest {
 
     @MockitoBean
     MatchService matchService;
-
-    @MockitoBean
-    ScoringService scoringService;
 
     @MockitoBean
     MessageSource messageSource;
@@ -169,12 +164,7 @@ class AdminMatchControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminSaveResult_shouldTriggerScoringAndRedirect() throws Exception {
-        Match match = new Match();
-        match.setId(1L);
-        match.setCountryA("Brazil");
-        match.setCountryB("France");
-        when(matchService.findById(1L)).thenReturn(match);
+    void adminSaveResult_shouldDelegateToServiceAndRedirect() throws Exception {
         when(messageSource.getMessage(any(), any(), any(Locale.class))).thenReturn("Result saved");
 
         mockMvc.perform(post("/admin/matches/1/result")
@@ -185,7 +175,6 @@ class AdminMatchControllerTest {
             .andExpect(redirectedUrl("/admin/matches"));
 
         verify(matchService).saveResult(1L, 2, 1);
-        verify(scoringService).calculateScoresForMatch(match);
     }
 
     @Test

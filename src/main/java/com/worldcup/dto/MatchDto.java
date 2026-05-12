@@ -1,5 +1,6 @@
 package com.worldcup.dto;
 
+import com.worldcup.domain.Match;
 import com.worldcup.validation.ValidChecksum;
 import com.worldcup.validation.ValidCountries;
 import com.worldcup.validation.ValidMatchDate;
@@ -34,6 +35,21 @@ public class MatchDto {
 
     private Integer goalsA;
     private Integer goalsB;
+
+    public static MatchDto from(Match match) {
+        MatchDto dto = new MatchDto();
+        dto.id = match.getId();
+        dto.countryA = match.getCountryA();
+        dto.countryB = match.getCountryB();
+        dto.matchDate = match.getMatchDate();
+        dto.city = match.getCity();
+        dto.stadium = match.getStadium();
+        dto.stadiumCode = match.getStadiumCode();
+        dto.checksum = match.getChecksum();
+        dto.goalsA = match.getGoalsA();
+        dto.goalsB = match.getGoalsB();
+        return dto;
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

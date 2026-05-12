@@ -2,6 +2,7 @@ package com.worldcup.service;
 
 import com.worldcup.domain.Match;
 import com.worldcup.domain.Prediction;
+import com.worldcup.domain.Role;
 import com.worldcup.domain.Team;
 import com.worldcup.domain.User;
 import com.worldcup.repository.MatchRepository;
@@ -74,7 +75,7 @@ class ScoringServiceTest {
         user.setUsername(prefix + "-" + UUID.randomUUID().toString().substring(0, 6));
         user.setEmail(user.getUsername() + "@test.com");
         user.setPassword("encoded");
-        user.setRole("ROLE_USER");
+        user.setRole(Role.USER);
         return userRepository.save(user);
     }
 

@@ -13,6 +13,7 @@ public interface PredictionRepository extends JpaRepository<Prediction, Long> {
     Optional<Prediction> findByUserAndMatch(User user, Match match);
     List<Prediction> findByMatch(Match match);
     List<Prediction> findByUser(User user);
+    long countByUser(User user);
 
     @Query("SELECT COALESCE(SUM(p.pointsAwarded), 0) FROM Prediction p WHERE p.user = :user")
     Integer getTotalScoreForUser(@Param("user") User user);

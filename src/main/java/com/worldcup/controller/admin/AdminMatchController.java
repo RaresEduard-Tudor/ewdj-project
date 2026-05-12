@@ -4,7 +4,6 @@ import com.worldcup.domain.Match;
 import com.worldcup.dto.MatchDto;
 import com.worldcup.exception.DuplicateMatchException;
 import com.worldcup.service.MatchService;
-import com.worldcup.service.ScoringService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -21,13 +20,10 @@ import java.util.Locale;
 public class AdminMatchController {
 
     private final MatchService matchService;
-    private final ScoringService scoringService;
     private final MessageSource messageSource;
 
-    public AdminMatchController(MatchService matchService, ScoringService scoringService,
-                                MessageSource messageSource) {
+    public AdminMatchController(MatchService matchService, MessageSource messageSource) {
         this.matchService = matchService;
-        this.scoringService = scoringService;
         this.messageSource = messageSource;
     }
 
@@ -65,16 +61,7 @@ public class AdminMatchController {
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         Match match = matchService.findById(id);
-        MatchDto dto = new MatchDto();
-        dto.setId(match.getId());
-        dto.setCountryA(match.getCountryA());
-        dto.setCountryB(match.getCountryB());
-        dto.setMatchDate(match.getMatchDate());
-        dto.setCity(match.getCity());
-        dto.setStadium(match.getStadium());
-        dto.setStadiumCode(match.getStadiumCode());
-        dto.setChecksum(match.getChecksum());
-        model.addAttribute("matchDto", dto);
+        model.addAttribute("matchDto", MatchDto.from(match));
         return "admin/match-form";
     }
 
@@ -85,8 +72,6 @@ public class AdminMatchController {
                              RedirectAttributes redirectAttributes,
                              Locale locale) {
         matchService.saveResult(id, goalsA, goalsB);
-        Match match = matchService.findById(id);
-        scoringService.calculateScoresForMatch(match);
         redirectAttributes.addFlashAttribute("successMessage",
             messageSource.getMessage("match.result.success", null, locale));
         return "redirect:/admin/matches";

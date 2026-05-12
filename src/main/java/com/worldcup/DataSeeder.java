@@ -1,6 +1,7 @@
 package com.worldcup;
 
 import com.worldcup.domain.Match;
+import com.worldcup.domain.Role;
 import com.worldcup.domain.User;
 import com.worldcup.repository.MatchRepository;
 import com.worldcup.repository.UserRepository;
@@ -39,7 +40,7 @@ public class DataSeeder implements CommandLineRunner {
             admin.setUsername("admin");
             admin.setEmail("admin@worldcup.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRole("ROLE_ADMIN");
+            admin.setRole(Role.ADMIN);
             userRepository.save(admin);
             log.info("Seeded default admin user.");
         }
@@ -47,13 +48,6 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedMatches() {
         if (matchRepository.count() > 0) return;
-
-        // Stadium codes (4-digit) and checksums: code % 97
-        // Azteca=3333→35, BBVA=4444→79, Akron=5555→26
-        // BCPlace=1111→44, BMO=2222→88
-        // MetLife=1001→31, ATT=1234→70, SoFi=2345→17, Levis=3456→61
-        // HardRock=4567→8, Lincoln=5678→52, Arrowhead=6789→96
-        // Gillette=7890→33, MileHigh=8901→74, Lumen=9012→88
 
         List<Match> matches = List.of(
             // Group A: Mexico, South Africa, South Korea, Czechia

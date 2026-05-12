@@ -1,30 +1,44 @@
 package com.worldcup.service;
 
+import com.worldcup.domain.Prediction;
 import com.worldcup.domain.Team;
 import com.worldcup.domain.User;
 import com.worldcup.exception.DuplicateTeamNameException;
 import com.worldcup.exception.TeamJoinException;
 import com.worldcup.exception.TeamNotFoundException;
+import com.worldcup.repository.PredictionRepository;
 import com.worldcup.repository.TeamRepository;
 import com.worldcup.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class TeamService {
 
+    private static final int INVITE_CODE_LENGTH = 8;
+    private static final int INVITE_CODE_MAX_RETRIES = 5;
+
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
-    private static final int INVITE_CODE_LENGTH = 8;
+    private final PredictionRepository predictionRepository;
 
-    public TeamService(TeamRepository teamRepository, UserRepository userRepository) {
+    public TeamService(TeamRepository teamRepository, UserRepository userRepository,
+                       PredictionRepository predictionRepository) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
+        this.predictionRepository = predictionRepository;
     }
 
     public String generateInviteCode() {
@@ -41,10 +55,9 @@ public class TeamService {
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         Team team = new Team();
         team.setName(name);
-        team.setInviteCode(generateInviteCode());
         team.setOwner(owner);
         team.getMembers().add(owner);
-        teamRepository.save(team);
+        saveWithFreshInviteCode(team);
         log.info("Team '{}' created by {}", name, username);
         return team;
     }
@@ -75,6 +88,29 @@ public class TeamService {
             .orElseThrow(() -> new TeamNotFoundException("Team not found: " + id));
     }
 
+    @Transactional(readOnly = true)
+    public Map<Long, Integer> computeMemberScores(Team team) {
+        return team.getMembers().stream()
+            .sorted((a, b) -> Long.compare(a.getId(), b.getId()))
+            .collect(Collectors.toMap(
+                User::getId,
+                m -> predictionRepository.getTotalScoreForUser(m),
+                (a, b) -> a,
+                LinkedHashMap::new));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, List<Prediction>> computeMemberPredictions(Team team) {
+        return team.getMembers().stream()
+            .collect(Collectors.toMap(
+                User::getId,
+                m -> predictionRepository.findByUser(m).stream()
+                    .sorted(Comparator.comparing(p -> p.getMatch().getMatchDate()))
+                    .collect(Collectors.toList()),
+                (a, b) -> a,
+                LinkedHashMap::new));
+    }
+
     @Transactional
     public void removeMember(Long teamId, Long memberId, User requester) {
         Team team = findById(teamId);
@@ -99,8 +135,7 @@ public class TeamService {
         if (!team.getOwner().getUsername().equals(requester.getUsername())) {
             throw new AccessDeniedException("Not the team owner.");
         }
-        team.setInviteCode(generateInviteCode());
-        teamRepository.save(team);
+        saveWithFreshInviteCode(team);
         log.info("Invite code regenerated for team {}", teamId);
     }
 
@@ -113,6 +148,20 @@ public class TeamService {
         team.setInviteEnabled(inviteEnabled);
         team.setMaxMembers(Math.max(0, maxMembers));
         teamRepository.save(team);
-        log.info("Settings updated for team {} by {}: inviteEnabled={} maxMembers={}", teamId, requester.getUsername(), inviteEnabled, maxMembers);
+        log.debug("Settings updated for team {} by {}: inviteEnabled={} maxMembers={}", teamId, requester.getUsername(), inviteEnabled, maxMembers);
+    }
+
+    private void saveWithFreshInviteCode(Team team) {
+        for (int attempt = 1; attempt <= INVITE_CODE_MAX_RETRIES; attempt++) {
+            String candidate = generateInviteCode();
+            if (!teamRepository.existsByInviteCode(candidate)) {
+                team.setInviteCode(candidate);
+                teamRepository.save(team);
+                return;
+            }
+            log.warn("Invite code collision on attempt {}, retrying", attempt);
+        }
+        throw new DataIntegrityViolationException("Could not generate unique invite code after "
+            + INVITE_CODE_MAX_RETRIES + " attempts");
     }
 }

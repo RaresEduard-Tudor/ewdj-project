@@ -21,6 +21,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(TeamNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleTeamNotFound(TeamNotFoundException ex, Model model) {
         log.warn("Team not found: {}", ex.getMessage());
         model.addAttribute("error", ex.getMessage());
@@ -28,8 +29,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DuplicateTeamNameException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public String handleDuplicateTeam(DuplicateTeamNameException ex, Model model) {
         log.warn("Duplicate team name: {}", ex.getMessage());
+        model.addAttribute("error", ex.getMessage());
+        return "error/error";
+    }
+
+    @ExceptionHandler(TeamJoinException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleTeamJoin(TeamJoinException ex, Model model) {
+        log.warn("Team join failed: {}", ex.getMessage());
         model.addAttribute("error", ex.getMessage());
         return "error/error";
     }
@@ -42,9 +52,26 @@ public class GlobalExceptionHandler {
         return "error/error";
     }
 
+    @ExceptionHandler(DuplicateMatchException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleDuplicateMatch(DuplicateMatchException ex, Model model) {
+        log.warn("Duplicate match: {}", ex.getMessage());
+        model.addAttribute("error", ex.getMessage());
+        return "error/error";
+    }
+
     @ExceptionHandler(DuplicateUsernameException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public String handleDuplicateUsername(DuplicateUsernameException ex, Model model) {
         log.warn("Duplicate username: {}", ex.getMessage());
+        model.addAttribute("error", ex.getMessage());
+        return "error/error";
+    }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleDuplicateEmail(DuplicateEmailException ex, Model model) {
+        log.warn("Duplicate email: {}", ex.getMessage());
         model.addAttribute("error", ex.getMessage());
         return "error/error";
     }

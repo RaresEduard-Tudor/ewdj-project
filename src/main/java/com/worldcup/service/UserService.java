@@ -1,7 +1,9 @@
 package com.worldcup.service;
 
+import com.worldcup.domain.Role;
 import com.worldcup.domain.User;
 import com.worldcup.dto.RegistrationDto;
+import com.worldcup.exception.DuplicateEmailException;
 import com.worldcup.exception.DuplicateUsernameException;
 import com.worldcup.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -30,22 +32,23 @@ public class UserService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
             .withUsername(user.getUsername())
             .password(user.getPassword())
-            .roles(user.getRole().replace("ROLE_", ""))
+            .roles(user.getRole().name())
             .build();
     }
 
     public void register(RegistrationDto dto) {
+        String normalizedEmail = dto.getEmail() == null ? null : dto.getEmail().trim().toLowerCase();
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
             throw new DuplicateUsernameException("Username already taken.");
         }
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new DuplicateUsernameException("Email already in use.");
+        if (normalizedEmail != null && userRepository.findByEmail(normalizedEmail).isPresent()) {
+            throw new DuplicateEmailException("Email already in use.");
         }
         User user = new User();
         user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
+        user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole("ROLE_USER");
+        user.setRole(Role.USER);
         userRepository.save(user);
         log.info("Registered new user: {}", dto.getUsername());
     }

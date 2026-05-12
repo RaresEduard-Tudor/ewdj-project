@@ -11,6 +11,8 @@ import com.worldcup.repository.PredictionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,20 +22,23 @@ public class PredictionService {
 
     private final MatchRepository matchRepository;
     private final PredictionRepository predictionRepository;
+    private final Clock clock;
 
     public PredictionService(MatchRepository matchRepository,
-                             PredictionRepository predictionRepository) {
+                             PredictionRepository predictionRepository,
+                             Clock clock) {
         this.matchRepository = matchRepository;
         this.predictionRepository = predictionRepository;
+        this.clock = clock;
     }
 
     @Transactional
-    public void savePrediction(PredictionDto dto, User user) {
-        Match match = matchRepository.findById(dto.getMatchId())
-            .orElseThrow(() -> new MatchNotFoundException("Match not found: " + dto.getMatchId()));
+    public void savePrediction(Long matchId, PredictionDto dto, User user) {
+        Match match = matchRepository.findById(matchId)
+            .orElseThrow(() -> new MatchNotFoundException("Match not found: " + matchId));
 
         LocalDateTime deadline = match.getMatchDate().minusHours(1);
-        if (LocalDateTime.now().isAfter(deadline)) {
+        if (LocalDateTime.now(clock).isAfter(deadline)) {
             throw new PredictionDeadlineException(
                 match.getCountryA() + " vs " + match.getCountryB(), deadline);
         }
@@ -47,7 +52,7 @@ public class PredictionService {
         prediction.setPredictedGoalsA(dto.getGoalsA());
         prediction.setPredictedGoalsB(dto.getGoalsB());
         predictionRepository.save(prediction);
-        log.info("Prediction saved for user {} on match {}", user.getUsername(), match.getId());
+        log.debug("Prediction saved for user {} on match {}", user.getUsername(), match.getId());
     }
 
     public List<Prediction> findByUser(User user) {

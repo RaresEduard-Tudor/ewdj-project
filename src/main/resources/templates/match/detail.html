@@ -36,7 +36,7 @@
             <span th:text="#{match.detail.prediction.current}">Current prediction</span>:
             <strong th:text="${existingPrediction.predictedGoalsA} + ' – ' + ${existingPrediction.predictedGoalsB}"></strong>
             <span th:if="${existingPrediction.pointsAwarded != null}" class="points-badge">
-                <span th:text="${existingPrediction.pointsAwarded}"></span> pts
+                <span th:text="${existingPrediction.pointsAwarded}"></span> <span th:text="#{points.badge}">pts</span>
             </span>
         </div>
 

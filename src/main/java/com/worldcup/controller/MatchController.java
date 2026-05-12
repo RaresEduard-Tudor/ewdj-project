@@ -81,9 +81,8 @@ public class MatchController {
             redirectAttributes.addFlashAttribute("predictionError", "prediction.error.invalid");
             return "redirect:" + redirectTo;
         }
-        predictionDto.setMatchId(id);
         User user = userService.findByUsername(principal.getName());
-        predictionService.savePrediction(predictionDto, user);
+        predictionService.savePrediction(id, predictionDto, user);
         redirectAttributes.addFlashAttribute("predictionSuccess", "prediction.saved");
         return "redirect:" + redirectTo;
     }

@@ -30,7 +30,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MatchController.class)
-@Import({SecurityConfig.class, PasswordEncoderConfig.class, com.worldcup.util.FlagUtil.class})
+@Import({SecurityConfig.class, PasswordEncoderConfig.class,
+    com.worldcup.util.FlagUtil.class, com.worldcup.util.CountryRegistry.class})
 class MatchControllerTest {
 
     @Autowired MockMvc mockMvc;

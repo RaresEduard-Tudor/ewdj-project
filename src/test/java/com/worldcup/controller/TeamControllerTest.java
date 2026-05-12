@@ -2,13 +2,13 @@ package com.worldcup.controller;
 
 import com.worldcup.config.PasswordEncoderConfig;
 import com.worldcup.config.SecurityConfig;
+import com.worldcup.domain.Role;
 import com.worldcup.domain.Team;
 import com.worldcup.domain.User;
 import com.worldcup.exception.DuplicateTeamNameException;
 import com.worldcup.exception.TeamJoinException;
 import com.worldcup.exception.TeamNotFoundException;
 import com.worldcup.interceptor.AdminAuditInterceptor;
-import com.worldcup.repository.PredictionRepository;
 import com.worldcup.service.TeamService;
 import com.worldcup.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +36,6 @@ class TeamControllerTest {
 
     @MockitoBean TeamService teamService;
     @MockitoBean UserService userService;
-    @MockitoBean PredictionRepository predictionRepository;
     @MockitoBean AdminAuditInterceptor adminAuditInterceptor;
 
     private User owner;
@@ -49,7 +48,7 @@ class TeamControllerTest {
         owner = new User();
         owner.setId(1L);
         owner.setUsername("owner");
-        owner.setRole("ROLE_USER");
+        owner.setRole(Role.USER);
         owner.setTeams(new HashSet<>());
 
         team = new Team();

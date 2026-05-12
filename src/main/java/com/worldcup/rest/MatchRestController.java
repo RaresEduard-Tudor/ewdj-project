@@ -23,7 +23,7 @@ public class MatchRestController {
     @GetMapping
     public List<MatchResponseDto> getMatchesByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        log.info("REST: fetching matches for date {}", date);
+        log.debug("REST: fetching matches for date {}", date);
         return matchService.findByDate(date).stream()
             .map(MatchResponseDto::from)
             .toList();

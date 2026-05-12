@@ -30,13 +30,16 @@
 
                 <!-- Members -->
                 <h2 th:text="#{team.members}" style="margin-top:24px">Members</h2>
+                <p class="muted-note" th:text="#{team.breakdown.hint}">Click a member to see their per-match points.</p>
                 <ul class="member-list">
                     <li th:each="member : ${team.members}" class="member-list__item">
-                        <span class="member-name-col">
+                        <button type="button" class="member-name-col member-name-col--btn"
+                                th:attr="data-member-id=${member.id}"
+                                onclick="openMemberBreakdown(this)">
                             <span th:text="${member.username}"></span>
                             <span th:if="${member.username == team.owner.username}" class="owner-badge" th:text="#{team.owner.badge}">Owner</span>
-                        </span>
-                        <span class="member-score" th:text="${memberScores[member.id]} + ' pts'">0 pts</span>
+                        </button>
+                        <span class="member-score" th:text="${memberScores[member.id]} + ' ' + #{points.badge}">0 pts</span>
                         <form th:if="${currentUser == team.owner.username and member.username != team.owner.username}"
                               th:action="@{/team/{id}/remove/{mid}(id=${team.id},mid=${member.id})}"
                               method="post">
@@ -45,6 +48,56 @@
                         </form>
                     </li>
                 </ul>
+
+                <!-- Per-member breakdown panels (hidden, opened from member click) -->
+                <div th:each="member : ${team.members}"
+                     th:id="'breakdown-' + ${member.id}"
+                     class="modal-overlay"
+                     onclick="if(event.target===this) closeMemberBreakdown(this)">
+                    <div class="modal-box modal-box--slim" onclick="event.stopPropagation()">
+                        <button class="modal-close" type="button" onclick="closeMemberBreakdown(this.parentElement.parentElement)">&times;</button>
+                        <h3 style="margin:0 0 4px 0">
+                            <span th:text="${member.username}"></span>
+                            <span class="points-badge" style="margin-left:8px"
+                                  th:text="${memberScores[member.id]} + ' ' + #{points.badge}">0 pts</span>
+                        </h3>
+                        <div class="muted-note" th:text="#{team.breakdown.title}" style="margin-bottom:12px">Points Breakdown</div>
+
+                        <div th:if="${#lists.isEmpty(memberPredictions[member.id])}"
+                             class="muted-note" th:text="#{team.breakdown.empty}">No predictions yet.</div>
+
+                        <table th:if="${!#lists.isEmpty(memberPredictions[member.id])}" class="pred-table" style="width:100%">
+                            <thead>
+                            <tr>
+                                <th th:text="#{prediction.col.match}">Match</th>
+                                <th th:text="#{prediction.col.date}">Date</th>
+                                <th th:text="#{prediction.col.mine}">My Prediction</th>
+                                <th th:text="#{prediction.col.result}">Result</th>
+                                <th th:text="#{prediction.col.points}">Points</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="p : ${memberPredictions[member.id]}">
+                                <td>
+                                    <span th:text="${@flagUtil.get(p.match.countryA)}"></span>
+                                    <span th:text="${p.match.countryA}"></span>
+                                    <span class="vs-sep" th:text="#{match.vs}">vs</span>
+                                    <span th:text="${@flagUtil.get(p.match.countryB)}"></span>
+                                    <span th:text="${p.match.countryB}"></span>
+                                </td>
+                                <td th:text="${#temporals.format(p.match.matchDate, 'dd MMM HH:mm')}"></td>
+                                <td><strong th:text="${p.predictedGoalsA} + ' – ' + ${p.predictedGoalsB}"></strong></td>
+                                <td th:text="${p.match.goalsA != null} ? ${p.match.goalsA} + ' – ' + ${p.match.goalsB} : #{prediction.tbd}">TBD</td>
+                                <td>
+                                    <span th:if="${p.pointsAwarded != null}" class="points-badge"
+                                          th:text="${p.pointsAwarded} + ' ' + #{points.badge}"></span>
+                                    <span th:if="${p.pointsAwarded == null}" class="muted-note">–</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <a th:href="@{/team/{id}/scoreboard(id=${team.id})}" class="btn" style="margin-top:16px" th:text="#{team.view.scoreboard}">View Scoreboard</a>
             </div>
@@ -85,6 +138,25 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function openMemberBreakdown(btn) {
+            const id = btn.dataset.memberId;
+            const overlay = document.getElementById('breakdown-' + id);
+            if (!overlay) return;
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMemberBreakdown(overlay) {
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.open').forEach(o => closeMemberBreakdown(o));
+            }
+        });
+    </script>
 
 </th:block>
 </body>

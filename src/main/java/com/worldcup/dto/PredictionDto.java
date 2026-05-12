@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 
 public class PredictionDto {
 
-    private Long matchId;
-
     @NotNull
     @Min(0)
     private Integer goalsA = 0;
@@ -15,8 +13,6 @@ public class PredictionDto {
     @Min(0)
     private Integer goalsB = 0;
 
-    public Long getMatchId() { return matchId; }
-    public void setMatchId(Long matchId) { this.matchId = matchId; }
     public Integer getGoalsA() { return goalsA; }
     public void setGoalsA(Integer goalsA) { this.goalsA = goalsA; }
     public Integer getGoalsB() { return goalsB; }

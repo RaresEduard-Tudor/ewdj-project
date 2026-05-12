@@ -2,7 +2,6 @@ package com.worldcup.controller;
 
 import com.worldcup.config.PasswordEncoderConfig;
 import com.worldcup.config.SecurityConfig;
-import com.worldcup.domain.Prediction;
 import com.worldcup.domain.User;
 import com.worldcup.interceptor.AdminAuditInterceptor;
 import com.worldcup.repository.PredictionRepository;
@@ -21,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -50,7 +50,7 @@ class HomeControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         when(adminAuditInterceptor.preHandle(any(), any(), any())).thenReturn(true);
-        when(matchService.findAll()).thenReturn(List.of());
+        when(matchService.findUpcoming(anyInt())).thenReturn(List.of());
     }
 
     @Test
@@ -75,7 +75,8 @@ class HomeControllerTest {
         user.setUsername("alice");
 
         when(userService.findByUsername("alice")).thenReturn(user);
-        when(predictionRepository.findByUser(user)).thenReturn(List.of());
+        when(predictionRepository.getTotalScoreForUser(user)).thenReturn(0);
+        when(predictionRepository.countByUser(user)).thenReturn(0L);
         when(teamRepository.countByMembersContaining(user)).thenReturn(0L);
 
         mockMvc.perform(get("/"))
@@ -90,17 +91,15 @@ class HomeControllerTest {
         user.setId(1L);
         user.setUsername("alice");
 
-        Prediction p = new Prediction();
-        p.setPointsAwarded(10);
-
         when(userService.findByUsername("alice")).thenReturn(user);
-        when(predictionRepository.findByUser(user)).thenReturn(List.of(p));
+        when(predictionRepository.getTotalScoreForUser(user)).thenReturn(10);
+        when(predictionRepository.countByUser(user)).thenReturn(1L);
         when(teamRepository.countByMembersContaining(user)).thenReturn(2L);
 
         mockMvc.perform(get("/"))
             .andExpect(status().isOk())
             .andExpect(model().attribute("userPoints", 10))
-            .andExpect(model().attribute("userPredictionCount", 1))
+            .andExpect(model().attribute("userPredictionCount", 1L))
             .andExpect(model().attribute("userTeamCount", 2L));
     }
 

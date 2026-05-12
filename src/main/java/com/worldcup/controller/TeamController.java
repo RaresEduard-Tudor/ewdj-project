@@ -5,7 +5,6 @@ import com.worldcup.domain.User;
 import com.worldcup.exception.DuplicateTeamNameException;
 import com.worldcup.exception.TeamJoinException;
 import com.worldcup.exception.TeamNotFoundException;
-import com.worldcup.repository.PredictionRepository;
 import com.worldcup.service.TeamService;
 import com.worldcup.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +27,10 @@ public class TeamController {
 
     private final TeamService teamService;
     private final UserService userService;
-    private final PredictionRepository predictionRepository;
 
-    public TeamController(TeamService teamService, UserService userService,
-                          PredictionRepository predictionRepository) {
+    public TeamController(TeamService teamService, UserService userService) {
         this.teamService = teamService;
         this.userService = userService;
-        this.predictionRepository = predictionRepository;
     }
 
     @GetMapping
@@ -117,13 +113,11 @@ public class TeamController {
         model.addAttribute("team", team);
         model.addAttribute("currentUser", principal.getName());
 
-        Map<Long, Integer> memberScores = team.getMembers().stream()
-            .collect(Collectors.toMap(
-                User::getId,
-                m -> predictionRepository.getTotalScoreForUser(m)));
+        Map<Long, Integer> memberScores = teamService.computeMemberScores(team);
         int totalScore = memberScores.values().stream().mapToInt(Integer::intValue).sum();
         model.addAttribute("memberScores", memberScores);
         model.addAttribute("totalScore", totalScore);
+        model.addAttribute("memberPredictions", teamService.computeMemberPredictions(team));
         return "team/detail";
     }
 
@@ -147,8 +141,9 @@ public class TeamController {
 
         Hibernate.initialize(team.getMembers());
 
+        Map<Long, Integer> memberScores = teamService.computeMemberScores(team);
         Map<User, Integer> ranked = team.getMembers().stream()
-            .collect(Collectors.toMap(m -> m, m -> predictionRepository.getTotalScoreForUser(m)))
+            .collect(Collectors.toMap(m -> m, m -> memberScores.getOrDefault(m.getId(), 0)))
             .entrySet().stream()
             .sorted(Map.Entry.<User, Integer>comparingByValue().reversed())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
