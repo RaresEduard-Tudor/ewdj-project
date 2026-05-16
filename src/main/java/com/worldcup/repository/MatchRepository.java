@@ -14,6 +14,14 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     boolean existsByStadiumAndMatchDateAndIdNot(String stadium, LocalDateTime matchDate, Long id);
 
+    @Query("SELECT COUNT(m) > 0 FROM Match m WHERE " +
+           "(m.countryA = :country OR m.countryB = :country) AND " +
+           "FUNCTION('DATE', m.matchDate) = :date AND " +
+           "(:excludeId IS NULL OR m.id <> :excludeId)")
+    boolean existsCountryOnDate(@Param("country") String country,
+                                @Param("date") LocalDate date,
+                                @Param("excludeId") Long excludeId);
+
     List<Match> findAllByOrderByMatchDateAsc();
 
     List<Match> findTop6ByGoalsAIsNullOrderByMatchDateAsc();

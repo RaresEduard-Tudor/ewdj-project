@@ -4,11 +4,13 @@ import com.worldcup.domain.Match;
 import com.worldcup.dto.MatchDto;
 import com.worldcup.exception.DuplicateMatchException;
 import com.worldcup.exception.MatchNotFoundException;
+import com.worldcup.exception.ResultBeforeKickoffException;
 import com.worldcup.repository.MatchRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +73,16 @@ public class MatchService {
                     " on " + dto.getMatchDate() + " already exists.");
             }
         }
+        if (dto.getMatchDate() != null) {
+            LocalDate day = dto.getMatchDate().toLocalDate();
+            for (String country : List.of(dto.getCountryA(), dto.getCountryB())) {
+                if (country == null || country.isBlank()) continue;
+                if (matchRepository.existsCountryOnDate(country, day, dto.getId())) {
+                    throw new DuplicateMatchException(country +
+                        " already has a match on " + day + ".");
+                }
+            }
+        }
         Match match = (dto.getId() != null)
             ? matchRepository.findById(dto.getId())
                 .orElseThrow(() -> new MatchNotFoundException("Match not found: " + dto.getId()))
@@ -89,6 +101,10 @@ public class MatchService {
     @Transactional
     public Match saveResult(Long id, Integer goalsA, Integer goalsB) {
         Match match = findById(id);
+        if (match.getMatchDate() != null && match.getMatchDate().isAfter(LocalDateTime.now())) {
+            throw new ResultBeforeKickoffException(
+                "Cannot save result before kickoff (" + match.getMatchDate() + ").");
+        }
         match.setGoalsA(goalsA);
         match.setGoalsB(goalsB);
         matchRepository.save(match);

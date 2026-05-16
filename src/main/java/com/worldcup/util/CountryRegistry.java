@@ -103,4 +103,10 @@ public class CountryRegistry {
     public Map<String, List<Country>> getGroups() {
         return BY_GROUP;
     }
+
+    public static String groupOf(String country) {
+        if (country == null) return null;
+        Country c = BY_NAME.get(country);
+        return c != null ? c.group() : null;
+    }
 }

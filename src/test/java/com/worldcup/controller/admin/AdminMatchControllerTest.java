@@ -102,7 +102,7 @@ class AdminMatchControllerTest {
 
         mockMvc.perform(post("/admin/matches")
                 .param("countryA", "Belgium")
-                .param("countryB", "France")
+                .param("countryB", "Egypt")
                 .param("matchDate", "2026-06-15T18:00")
                 .param("stadiumCode", "1234")
                 .param("checksum", "70")
@@ -134,7 +134,7 @@ class AdminMatchControllerTest {
 
         mockMvc.perform(post("/admin/matches")
                 .param("countryA", "Belgium")
-                .param("countryB", "France")
+                .param("countryB", "Egypt")
                 .param("matchDate", "2026-06-15T18:00")
                 .param("stadiumCode", "1234")
                 .param("checksum", "70")
@@ -194,7 +194,7 @@ class AdminMatchControllerTest {
     void adminSaveMatch_asUser_shouldBeForbidden() throws Exception {
         mockMvc.perform(post("/admin/matches")
                 .param("countryA", "Belgium")
-                .param("countryB", "France")
+                .param("countryB", "Egypt")
                 .with(csrf()))
             .andExpect(status().isForbidden());
     }

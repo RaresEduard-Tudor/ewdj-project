@@ -4,6 +4,7 @@ import com.worldcup.domain.Match;
 import com.worldcup.dto.MatchDto;
 import com.worldcup.exception.DuplicateMatchException;
 import com.worldcup.exception.MatchNotFoundException;
+import com.worldcup.exception.ResultBeforeKickoffException;
 import com.worldcup.repository.MatchRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,6 +94,45 @@ class MatchServiceTest {
     }
 
     @Test
+    void save_whenCountryAlreadyPlaysSameDay_shouldThrow() {
+        LocalDateTime when = LocalDateTime.of(2026, 6, 20, 19, 10);
+        when(matchRepository.existsCountryOnDate(eq("Belgium"), eq(when.toLocalDate()), isNull()))
+            .thenReturn(true);
+
+        MatchDto dto = new MatchDto();
+        dto.setCountryA("Belgium");
+        dto.setCountryB("Egypt");
+        dto.setMatchDate(when);
+        dto.setStadium("BC Place");
+        dto.setStadiumCode("1111");
+
+        assertThatThrownBy(() -> matchService.save(dto))
+            .isInstanceOf(DuplicateMatchException.class)
+            .hasMessageContaining("Belgium");
+        verify(matchRepository, never()).save(any());
+    }
+
+    @Test
+    void save_whenEditingSameMatchOnSameDay_shouldNotThrow() {
+        LocalDateTime when = LocalDateTime.of(2026, 6, 20, 19, 10);
+        when(matchRepository.existsCountryOnDate(anyString(), eq(when.toLocalDate()), eq(1L)))
+            .thenReturn(false);
+        when(matchRepository.findById(1L)).thenReturn(Optional.of(sampleMatch));
+
+        MatchDto dto = new MatchDto();
+        dto.setId(1L);
+        dto.setCountryA("Belgium");
+        dto.setCountryB("Egypt");
+        dto.setMatchDate(when);
+        dto.setStadium("BC Place");
+        dto.setStadiumCode("1111");
+
+        matchService.save(dto);
+
+        verify(matchRepository).save(any(Match.class));
+    }
+
+    @Test
     void save_whenEditingMissingMatch_shouldThrow() {
         when(matchRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -109,12 +149,24 @@ class MatchServiceTest {
 
     @Test
     void saveResult_shouldUpdateGoalsAndTriggerScoring() {
+        sampleMatch.setMatchDate(LocalDateTime.now().minusDays(1));
         when(matchRepository.findById(1L)).thenReturn(Optional.of(sampleMatch));
 
         matchService.saveResult(1L, 2, 1);
 
         verify(matchRepository).save(argThat(m -> m.getGoalsA() == 2 && m.getGoalsB() == 1));
         verify(scoringService).calculateScoresForMatch(sampleMatch);
+    }
+
+    @Test
+    void saveResult_whenMatchInFuture_shouldThrow() {
+        sampleMatch.setMatchDate(LocalDateTime.now().plusDays(1));
+        when(matchRepository.findById(1L)).thenReturn(Optional.of(sampleMatch));
+
+        assertThatThrownBy(() -> matchService.saveResult(1L, 2, 1))
+            .isInstanceOf(ResultBeforeKickoffException.class);
+        verify(matchRepository, never()).save(any());
+        verify(scoringService, never()).calculateScoresForMatch(any());
     }
 
     @Test

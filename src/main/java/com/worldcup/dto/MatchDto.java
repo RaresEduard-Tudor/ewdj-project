@@ -1,6 +1,7 @@
 package com.worldcup.dto;
 
 import com.worldcup.domain.Match;
+import com.worldcup.validation.SameGroupCountries;
 import com.worldcup.validation.ValidChecksum;
 import com.worldcup.validation.ValidCountries;
 import com.worldcup.validation.ValidMatchDate;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @ValidChecksum
 @ValidCountries
+@SameGroupCountries
 public class MatchDto {
 
     private Long id;

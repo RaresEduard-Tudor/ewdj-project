@@ -7,6 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @ControllerAdvice
 @Slf4j
@@ -60,6 +62,14 @@ public class GlobalExceptionHandler {
         return "error/error";
     }
 
+    @ExceptionHandler(ResultBeforeKickoffException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleResultBeforeKickoff(ResultBeforeKickoffException ex, Model model) {
+        log.warn("Result before kickoff: {}", ex.getMessage());
+        model.addAttribute("error", ex.getMessage());
+        return "error/error";
+    }
+
     @ExceptionHandler(DuplicateUsernameException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleDuplicateUsername(DuplicateUsernameException ex, Model model) {
@@ -74,6 +84,13 @@ public class GlobalExceptionHandler {
         log.warn("Duplicate email: {}", ex.getMessage());
         model.addAttribute("error", ex.getMessage());
         return "error/error";
+    }
+
+    @ExceptionHandler({ NoHandlerFoundException.class, NoResourceFoundException.class })
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleNotFound(Exception ex, Model model) {
+        log.warn("404: {}", ex.getMessage());
+        return "error/404";
     }
 
     @ExceptionHandler(AccessDeniedException.class)
