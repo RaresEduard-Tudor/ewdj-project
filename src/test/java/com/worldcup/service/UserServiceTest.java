@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -34,7 +35,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         existingUser = new User();
-        existingUser.setId(1L);
+        ReflectionTestUtils.setField(existingUser, "id", 1L);
         existingUser.setUsername("alice");
         existingUser.setEmail("alice@example.com");
         existingUser.setPassword("encoded");

@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -71,7 +72,7 @@ class HomeControllerTest {
     @WithMockUser(username = "alice")
     void homePage_whenAuthenticated_shouldHaveUsernameInModel() throws Exception {
         User user = new User();
-        user.setId(1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
         user.setUsername("alice");
 
         when(userService.findByUsername("alice")).thenReturn(user);
@@ -88,7 +89,7 @@ class HomeControllerTest {
     @WithMockUser(username = "alice")
     void homePage_whenAuthenticated_shouldHaveStatsInModel() throws Exception {
         User user = new User();
-        user.setId(1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
         user.setUsername("alice");
 
         when(userService.findByUsername("alice")).thenReturn(user);

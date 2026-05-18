@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -43,7 +44,7 @@ class TeamDetailRenderTest {
     @WithMockUser(username = "owner")
     void detail_rendersWithBreakdown() throws Exception {
         User owner = new User();
-        owner.setId(1L);
+        ReflectionTestUtils.setField(owner, "id", 1L);
         owner.setUsername("owner");
         owner.setEmail("o@x.com");
         owner.setRole(Role.USER);

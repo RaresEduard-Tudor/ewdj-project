@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -40,7 +41,7 @@ class PredictionServiceTest {
         predictionService = new PredictionService(matchRepository, predictionRepository, Clock.systemDefaultZone());
 
         user = new User();
-        user.setId(1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
         user.setUsername("testuser");
 
         futureMatch = new Match();

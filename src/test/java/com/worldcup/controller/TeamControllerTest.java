@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashSet;
@@ -46,7 +47,7 @@ class TeamControllerTest {
         when(adminAuditInterceptor.preHandle(any(), any(), any())).thenReturn(true);
 
         owner = new User();
-        owner.setId(1L);
+        ReflectionTestUtils.setField(owner, "id", 1L);
         owner.setUsername("owner");
         owner.setRole(Role.USER);
         owner.setTeams(new HashSet<>());
@@ -184,7 +185,7 @@ class TeamControllerTest {
     @WithMockUser(username = "notmember")
     void teamDetail_asNonMember_shouldBeForbidden() throws Exception {
         User nonMember = new User();
-        nonMember.setId(99L);
+        ReflectionTestUtils.setField(nonMember, "id", 99L);
         nonMember.setUsername("notmember");
 
         when(teamService.findById(1L)).thenReturn(team);

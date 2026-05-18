@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ class PredictionControllerTest {
     void setUp() throws Exception {
         when(adminAuditInterceptor.preHandle(any(), any(), any())).thenReturn(true);
         testUser = new User();
-        testUser.setId(1L);
+        ReflectionTestUtils.setField(testUser, "id", 1L);
         testUser.setUsername("testuser");
     }
 

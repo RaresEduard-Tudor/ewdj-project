@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -69,7 +70,7 @@ class MatchControllerTest {
     @WithMockUser
     void matchList_whenAuthenticated_shouldIncludeUserPredictions() throws Exception {
         User user = new User();
-        user.setId(1L);
+        ReflectionTestUtils.setField(user, "id", 1L);
         user.setUsername("testuser");
         when(matchService.findAll()).thenReturn(List.of(sampleMatch));
         when(userService.findByUsername("testuser")).thenReturn(user);

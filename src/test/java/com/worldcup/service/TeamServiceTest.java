@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -37,11 +38,11 @@ class TeamServiceTest {
     @BeforeEach
     void setUp() {
         owner = new User();
-        owner.setId(1L);
+        ReflectionTestUtils.setField(owner, "id", 1L);
         owner.setUsername("alice");
 
         member = new User();
-        member.setId(2L);
+        ReflectionTestUtils.setField(member, "id", 2L);
         member.setUsername("bob");
 
         team = new Team();
