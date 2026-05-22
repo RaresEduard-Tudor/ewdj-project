@@ -13,17 +13,14 @@
 <nav>
     <div class="nav-left">
         <a th:href="@{/}"><strong>WC2026</strong></a>
+        <a th:href="@{/matches}" th:text="#{nav.matches}">Matches</a>
+        <a th:href="@{/groups}"  th:text="#{nav.groups}">Groups</a>
         <a th:href="@{/top10}" th:text="#{nav.top10}">Top 10</a>
     </div>
 
     <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">&#9776;</button>
 
     <div class="nav-links">
-        <div class="nav-center">
-            <a th:href="@{/matches}" th:text="#{nav.matches}">Matches</a>
-            <a th:href="@{/groups}"  th:text="#{nav.groups}">Groups</a>
-        </div>
-
         <div class="nav-right">
             <span sec:authorize="isAuthenticated()">
                 <a th:href="@{/team}"         th:text="#{nav.my.teams}">My Teams</a>

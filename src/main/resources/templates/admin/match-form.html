@@ -37,8 +37,10 @@
             <label th:text="#{match.form.checksum}">Checksum (stadiumCode % 97)</label>
             <input type="number" th:field="*{checksum}"/>
 
-            <button type="submit" class="btn" th:text="#{form.save}">Save</button>
-            <a th:href="@{/admin/matches}" class="btn" style="background:#888" th:text="#{form.cancel}">Cancel</a>
+            <div style="display:flex;gap:12px;margin-top:8px">
+                <button type="submit" class="btn btn-gold" th:text="#{form.save}">Save</button>
+                <a th:href="@{/admin/matches}" class="btn btn-outline" th:text="#{form.cancel}">Cancel</a>
+            </div>
         </form>
     </div>
 </th:block>
