@@ -152,18 +152,17 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedDemoTeams() {
-        if (teamRepository.count() > 0) return;
-
-        seedTeam("Oranje Boven",      "alice",  List.of("bob", "charlie"));
-        seedTeam("The Dribblers",     "diana",  List.of("ethan", "fiona"));
-        seedTeam("Hat Trick Heroes",  "george", List.of("hannah", "bob"));
-
-        log.info("Seeded 3 demo teams.");
+        int created = 0;
+        created += seedTeam("Oranje Boven",     "alice",  List.of("bob", "charlie"));
+        created += seedTeam("The Dribblers",    "diana",  List.of("ethan", "fiona"));
+        created += seedTeam("Hat Trick Heroes", "george", List.of("hannah", "bob"));
+        if (created > 0) log.info("Seeded {} demo teams.", created);
     }
 
-    private void seedTeam(String name, String ownerUsername, List<String> extraMembers) {
+    private int seedTeam(String name, String ownerUsername, List<String> extraMembers) {
+        if (teamRepository.findByName(name).isPresent()) return 0;
         User owner = userRepository.findByUsername(ownerUsername).orElse(null);
-        if (owner == null) return;
+        if (owner == null) return 0;
         Team team = new Team();
         team.setName(name);
         team.setInviteCode(UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase());
@@ -173,11 +172,10 @@ public class DataSeeder implements CommandLineRunner {
             userRepository.findByUsername(memberUsername).ifPresent(team.getMembers()::add);
         }
         teamRepository.save(team);
+        return 1;
     }
 
     private void seedDemoPredictions() {
-        if (predictionRepository.count() > 0) return;
-
         List<Match> matches = matchRepository.findAll();
         if (matches.isEmpty()) return;
 
@@ -186,12 +184,12 @@ public class DataSeeder implements CommandLineRunner {
         for (String username : DEMO_USERNAMES) {
             User user = userRepository.findByUsername(username).orElse(null);
             if (user == null) continue;
-            // each demo user predicts a random ~half of the matches
             List<Match> shuffled = new ArrayList<>(matches);
             java.util.Collections.shuffle(shuffled, rng);
             int count = matches.size() / 2;
             for (int i = 0; i < count; i++) {
                 Match m = shuffled.get(i);
+                if (predictionRepository.findByUserAndMatch(user, m).isPresent()) continue;
                 Prediction p = new Prediction();
                 p.setUser(user);
                 p.setMatch(m);
@@ -201,6 +199,6 @@ public class DataSeeder implements CommandLineRunner {
                 created++;
             }
         }
-        log.info("Seeded {} demo predictions.", created);
+        if (created > 0) log.info("Seeded {} demo predictions.", created);
     }
 }
