@@ -145,6 +145,9 @@ nav a strong::before {
 .nav-left { gap: 18px; }
 .nav-links { display: flex; align-items: center; gap: 16px; }
 .nav-right { gap: 10px; }
+.nav-lang { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; opacity: 0.85; margin-left: 6px; }
+.nav-lang a { font-weight: 700; text-decoration: none; }
+.nav-lang span { opacity: 0.5; }
 
 .nav-user {
     display: inline-flex;

@@ -43,6 +43,11 @@
                 <a th:href="@{/login}"    th:text="#{nav.login}">Login</a>
                 <a th:href="@{/register}" th:text="#{nav.register}">Register</a>
             </span>
+            <span class="nav-lang">
+                <a th:href="@{''(lang='en')}">EN</a>
+                <span>|</span>
+                <a th:href="@{''(lang='nl')}">NL</a>
+            </span>
         </div>
     </div>
 </nav>

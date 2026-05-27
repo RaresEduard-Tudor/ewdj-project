@@ -1,9 +1,5 @@
 # FIFA World Cup 2026 — Team Prediction App
 
-Spring Boot + Thymeleaf university assignment. **Missing any of the 9 sub-requirements = herexamen (re-examination).**
-
----
-
 ## Assignment Requirements Checklist
 
 | # | Requirement | Implementation |
@@ -183,9 +179,3 @@ src/main/java/com/worldcup/
 `StadiumCapacityClient` calls `http://localhost:9001/api/matches/stadiums/{code}/capacity` — calls the app itself. No external API needed.
 
 ---
-
-## Submission
-
-- Change `spring.jpa.hibernate.ddl-auto=create` → `none` before submitting.
-- Zip as: `Klasgroep_Naam_Voornaam.zip`
-- Deadline: **Saturday 23 May, 23:59**

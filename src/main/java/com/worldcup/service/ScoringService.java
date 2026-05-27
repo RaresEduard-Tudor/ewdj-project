@@ -4,28 +4,45 @@ import com.worldcup.domain.Match;
 import com.worldcup.domain.Prediction;
 import com.worldcup.domain.Team;
 import com.worldcup.repository.PredictionRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
 @Slf4j
 public class ScoringService {
 
-    @Value("${scoring.exact}") private int X;
-    @Value("${scoring.outcome}") private int Y;
-    @Value("${scoring.bonus.exact}") private int B;
-    @Value("${scoring.bonus.outcome}") private int C;
+    private int X;
+    private int Y;
+    private int B;
+    private int C;
 
     private final PredictionRepository predictionRepository;
+    private final MessageSource messageSource;
 
-    public ScoringService(PredictionRepository predictionRepository) {
+    public ScoringService(PredictionRepository predictionRepository, MessageSource messageSource) {
         this.predictionRepository = predictionRepository;
+        this.messageSource = messageSource;
+    }
+
+    @PostConstruct
+    void loadScoringConstants() {
+        X = readInt("scoring.exact");
+        Y = readInt("scoring.outcome");
+        B = readInt("scoring.bonus.exact");
+        C = readInt("scoring.bonus.outcome");
+    }
+
+    private int readInt(String key) {
+        String raw = messageSource.getMessage(key, null, Locale.ROOT);
+        return Integer.parseInt(raw.trim());
     }
 
     @Transactional

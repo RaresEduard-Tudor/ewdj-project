@@ -1,68 +1,52 @@
-# FIFA World Cup 2026 - Prediction App
+# FIFA Wereldbeker 2026 — Voorspellingsapp
 
-A Spring Boot + Thymeleaf web app where users predict match scores for the FIFA World Cup 2026, compete in teams, and climb the public leaderboard.
-
----
-
-## Features
-
-- **Match predictions**: predict scores for all 24 group stage matches; edit until 1 hour before kick-off
-- **Automatic scoring**: exact score, correct outcome, and bonus points for being the sole predictor in your team
-- **Team management**: create teams, join via invite code, manage members and settings (invite toggle, max members)
-- **Group standings**: live group table with W/D/L/GD/Pts for all 12 WC 2026 groups
-- **Public Top-10**: leaderboard of the best teams by total score, visible to everyone (including guests)
-- **Admin panel**: add/edit matches, enter final results via modal, audit log for all admin actions
-- **Match filtering**: search by country, filter by date or status (upcoming/final)
-- **Spring Security**: role-based access (USER / ADMIN), login/logout always in nav
-- **Responsive UI**: hamburger nav on mobile, CSS animations, medal indicators on scoreboard
+Spring Boot + Thymeleaf webapplicatie waarin gebruikers wedstrijduitslagen voorspellen voor het WK 2026, in teams strijden om punten en de publieke ranglijst beklimmen.
 
 ---
 
-## Tech Stack
+## ⚠ Belangrijk vóór het opstarten
 
-| Layer | Technology |
+`spring.jpa.hibernate.ddl-auto=update` staat **bewust aan** in `src/main/resources/application.properties`.
+
+**Waarom:**
+- Bij de eerste start op een lege `worldcup`-databank maakt Hibernate automatisch alle tabellen aan — geen handmatige SQL-scripts nodig
+- `update` is niet-destructief: bestaande data blijft behouden bij elke herstart
+- `none` zou crashen op een verse databank (geen tabellen = `SQLException`); `create` of `create-drop` zouden bij elke herstart alle data wissen
+- De `DataSeeder` is idempotent (controleert eerst of admin/wedstrijden al bestaan) — herstarten is dus altijd veilig
+
+Kortom: gewoon laten staan. App start, tabellen verschijnen, admin + 24 wedstrijden worden geseed.
+
+---
+
+## Functionaliteiten
+
+- **Voorspellingen**: scores voorspellen voor alle 24 groepsfasewedstrijden; aanpasbaar tot 1 uur voor aftrap
+- **Automatische puntenberekening**: exacte score, juiste uitslag, bonuspunten als enige voorspeller binnen het team
+- **Teambeheer**: teams aanmaken, lid worden via uitnodigingscode, leden en instellingen beheren
+- **Groepsstanden**: live tabel met W/G/V/DS/Pnt voor alle 12 WK-groepen
+- **Publieke Top-10**: ranglijst van de beste teams, zichtbaar voor iedereen (ook gasten)
+- **Adminpaneel**: wedstrijden toevoegen/bewerken, einduitslagen invoeren, auditlog voor alle adminacties
+- **Spring Security**: rolgebaseerde toegang (USER / ADMIN)
+- **Meertalig**: volledig vertaald naar Nederlands en Engels (`?lang=nl` / `?lang=en`)
+
+---
+
+## Vereisten
+
+| Onderdeel | Versie |
 |---|---|
-| Backend | Spring Boot 3.4, Java 21 |
-| Views | Thymeleaf + Thymeleaf Security Dialect |
-| Security | Spring Security 6 |
-| Persistence | Spring Data JPA + MySQL 8 (H2 for tests) |
-| Validation | Jakarta Validation + 5 custom annotations |
-| HTTP Client | Spring WebFlux WebClient (reactive) |
-| i18n | Resource bundles (`messages.properties`) |
-| Build | Maven |
-
----
-
-## Design Patterns
-
-| Pattern | Where in the project |
-|---|---|
-| **MVC** | Core architecture: `@Controller` handles requests, delegates to `@Service`, returns Thymeleaf view names. Model populated via Spring's `Model` object |
-| **Singleton** | All Spring beans (`@Service`, `@Controller`, `@Component`, `@Repository`) are singletons managed by the IoC container. Dependencies injected via constructor injection |
-| **Factory** | `@Bean` methods act as factory methods: `PasswordEncoderConfig.passwordEncoder()`, `SecurityConfig.filterChain()`. Also `MatchResponseDto.from(Match)` is a static factory converting entities to DTOs |
-| **Strategy** | `ConstraintValidator` interface with 5 implementations (`EmailValidator`, `PasswordsValidator`, `ChecksumValidator`, `CountriesValidator`, `MatchDateValidator`), each providing a different validation strategy. Also `UserDetailsService` with custom `UserService` implementation |
-| **Template Method** | `CommandLineRunner.run()` in `DataSeeder`: Spring defines the startup lifecycle template, we fill in the `run()` step. `HandlerInterceptor.preHandle()` in `AdminAuditInterceptor` follows the same idea |
-| **Observer** | When admin saves a match result, `ScoringService` recalculates all prediction scores for that match, including per-team bonus logic. Spring's event-driven lifecycle (DataSeeder on startup) also fits |
-| **Proxy** | `StadiumCapacityClient` wraps WebClient calls behind a simple `fetchCapacity()` method, acting as a proxy to the REST API. Spring also generates JPA repository proxies at runtime for all `JpaRepository` interfaces |
-| **Facade** | `SecurityConfig.filterChain()` configures auth rules, login, logout, and URL permissions through one fluent API instead of dozens of separate security components |
-| **Builder** | `WebClient.builder().baseUrl(baseUrl).build()` in `StadiumCapacityClient`. `HttpSecurity` also uses builder-style fluent API in `SecurityConfig` |
-| **Adapter** | `UserService implements UserDetailsService`: adapts our `User` entity and `UserRepository` to Spring Security's `UserDetails` interface |
-| **Iterator & Composite** | Thymeleaf `th:each` iterates over collections in every list view. Group standings use `Map<String, List<TeamStandingDto>>`: a composite structure of groups containing team standings |
-| **Decorator** | Spring Security's filter chain decorates requests with authentication context. `@Transactional` decorates service methods with transaction management (AOP-based) |
-| **Command** | `DataSeeder implements CommandLineRunner`: encapsulates startup seeding actions as a command object executed by the framework |
-| **State** | Not explicitly used |
+| Java JDK | 21 |
+| Maven | 3.9+ (of gebruik de meegeleverde `mvnw`) |
+| MySQL | 8 |
+| IntelliJ IDEA | 2023.3+ (optioneel, bundelt eigen Maven) |
 
 ---
 
 ## Setup
 
-### Prerequisites
+### 1. MySQL starten
 
-- Java 21
-- Maven
-- Docker
-
-### 1. Start MySQL
+Optie A — via Docker (aanbevolen):
 
 ```bash
 docker run -d \
@@ -73,132 +57,134 @@ docker run -d \
   mysql:8
 ```
 
-If the container already exists from a previous run:
+Als de container al bestaat van een vorige run:
 
 ```bash
 docker start worldcup-mysql
 ```
 
-### 2. Run the app
+Optie B — eigen lokale MySQL: maak handmatig een database `worldcup` aan en zorg dat gebruiker `root` / wachtwoord `admin123` toegang heeft, of pas `src/main/resources/application.properties` aan (regels 2–4).
+
+### 2. Applicatie starten
+
+Vanaf de commandline:
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
-### 3. Open in browser
+(Windows: `mvnw.cmd spring-boot:run`)
+
+Of in IntelliJ: open de map als Maven-project en draai `WorldcupApplication.main()`.
+
+### 3. Openen in browser
 
 ```
 http://localhost:9001
 ```
 
-### Default admin account
+### Standaard adminaccount
 
-| Username | Password |
+| Gebruikersnaam | Wachtwoord |
 |---|---|
 | `admin` | `admin123` |
 
-The seeder runs on startup and creates the admin account + all 24 WC 2026 group stage fixtures automatically (only if the DB is empty).
+De `DataSeeder` draait bij opstart en maakt automatisch het adminaccount + alle 24 WK-groepsfasewedstrijden aan (alleen als de databank leeg is).
 
 ---
 
-## Project Structure
+## Tests uitvoeren
+
+Tests gebruiken een in-memory H2-databank — Docker/MySQL is **niet** nodig om te testen.
+
+```bash
+./mvnw test
+```
+
+Verwacht resultaat: **166 tests, 0 failures**.
+
+---
+
+## Projectstructuur
 
 ```
 src/main/java/com/worldcup/
 ├── config/          SecurityConfig, WebConfig, PasswordEncoderConfig
-├── controller/      HomeController, AuthController, MatchController,
-│                    TeamController, PredictionController,
-│                    ScoreboardController, GroupsController
+├── controller/      Home, Auth, Match, Team, Prediction, Scoreboard, Groups
 │   └── admin/       AdminMatchController
 ├── rest/            MatchRestController (REST API)
-├── client/          StadiumCapacityClient (WebClient)
+├── client/          StadiumCapacityClient (reactieve WebClient)
 ├── domain/          User, Team, Match, Prediction
-├── dto/             RegistrationDto, MatchDto, MatchResponseDto,
-│                    PredictionDto, TeamStandingDto
+├── dto/             RegistrationDto, MatchDto, MatchResponseDto, ...
 ├── exception/       GlobalExceptionHandler + custom exceptions
 ├── interceptor/     AdminAuditInterceptor
-├── repository/      UserRepository, TeamRepository, MatchRepository,
-│                    PredictionRepository
-├── service/         UserService, TeamService, MatchService,
-│                    PredictionService, ScoringService
-├── util/            FlagUtil
-├── validation/      5 custom Jakarta annotations + validators
+├── repository/      JPA repositories
+├── service/         User, Team, Match, Prediction, Scoring
+├── validation/      6 custom Jakarta-annotaties + validators
 ├── DataSeeder.java
 └── WorldcupApplication.java
 ```
 
 ---
 
-## Scoring
+## Puntensysteem
 
-Configured in `application.properties` and loaded via `@Value`:
+Geconfigureerd in `messages.properties` (resource bundle) en geladen via `MessageSource` in `ScoringService`:
 
-| Event | Points |
+| Gebeurtenis | Punten |
 |---|---|
-| Exact score | 10 |
-| Correct outcome (win/draw) | 5 |
-| Bonus: sole exact score in team | +5 |
-| Bonus: sole correct outcome in team | +3 |
+| Exacte score | 10 |
+| Juiste uitslag (winst/gelijk) | 5 |
+| Bonus: enige met exacte score in team | +5 |
+| Bonus: enige met juiste uitslag in team | +3 |
 
 ---
 
-## Custom Validators
+## Custom validators
 
-| Annotation | Purpose |
+| Annotatie | Doel |
 |---|---|
-| `@ValidEmail` | Validates email format |
-| `@ValidPasswords` | Checks password and confirm password match (class-level) |
-| `@ValidChecksum` | Verifies checksum equals stadiumCode % 97 |
-| `@ValidCountries` | Ensures Country A and Country B are different |
-| `@ValidMatchDate` | Date must fall within FIFA WC 2026 period (June 11 - July 19, 2026) |
+| `@ValidEmail` | Controleert e-mailformaat |
+| `@ValidPasswords` | Controleert of wachtwoord en bevestiging gelijk zijn |
+| `@ValidChecksum` | Verifieert checksum = stadiumCode % 97 |
+| `@ValidCountries` | Land A ≠ Land B |
+| `@SameGroupCountries` | Land A en Land B in dezelfde groep |
+| `@ValidMatchDate` | Datum binnen WK-periode (11 juni – 19 juli 2026) |
 
 ---
 
-## Testing
+## Pre-zip checklist
 
-37 tests covering:
+Voordat je het project inlevert:
 
-- **Unit tests**: `MatchDateValidatorTest`, `PasswordsValidatorTest` (custom validator logic)
-- **Integration tests**: `ScoringServiceTest` (full scoring + bonus calculation with H2 DB)
-- **MVC tests**: `MatchControllerTest`, `AdminMatchControllerTest` (MockMvc, form submission, redirects)
-- **REST tests**: `MatchRestControllerTest` (JSON responses, status codes)
-- **Security tests**: `SecurityConfigTest` (role-based access, login/logout, CSRF)
+- [ ] **Tests groen**: `./mvnw test` → `BUILD SUCCESS` (166/166)
+- [ ] **`ddl-auto`** in `src/main/resources/application.properties` staat op `update` (veilig voor een verse databank) — niet op `create`
+- [ ] **Geen geheimen** in `application.properties` buiten de standaard dev-credentials
+- [ ] **Project schoonmaken**: `./mvnw clean` om `target/` te verwijderen
+- [ ] **Zip-inhoud nakijken** — moet bevatten:
+  - `src/`, `pom.xml`, `mvnw`, `mvnw.cmd`, `.mvn/`, `README.md`, `guidelines.md`
+- [ ] **Zip-inhoud nakijken** — mag NIET bevatten:
+  - `target/`, `.idea/`, `*.iml`, `.git/`, `.DS_Store`
+- [ ] **Zip-naam**: `Klasgroep_Naam_Voornaam.zip`
+- [ ] **Deadline**: zaterdag 23 mei, 23:59
+
+Snelle zip vanuit de bovenliggende map (Linux/Mac):
 
 ```bash
-mvn test
+cd ..
+zip -r Klasgroep_Tudor_Rares.zip ewdj-project \
+  -x 'ewdj-project/target/*' \
+  -x 'ewdj-project/.idea/*' \
+  -x 'ewdj-project/.git/*' \
+  -x '*.iml' \
+  -x '.DS_Store'
 ```
 
 ---
 
-## Security
+## Opmerkingen
 
-- **Roles**: `ROLE_USER` (default on registration), `ROLE_ADMIN` (seeded)
-- **Protected routes**: `/team/**`, `/predictions/**` require authentication; `/admin/**` requires `ROLE_ADMIN`
-- **Public routes**: `/`, `/matches`, `/groups`, `/top10`, `/login`, `/register`, `/api/**`
-- **CSRF**: enabled on all POST forms via hidden `_csrf` token
-- **Password encoding**: BCrypt via `PasswordEncoder` bean
-- **Nav**: login/logout always visible; role-gated links for admin and authenticated sections
-
----
-
-## Error Handling
-
-| Exception | HTTP | Handler |
-|---|---|---|
-| `PredictionDeadlineException` | 400 | Shows deadline message |
-| `TeamNotFoundException` | 404 | Team not found page |
-| `DuplicateTeamNameException` | 409 | Redirects with error |
-| `MatchNotFoundException` | 404 | Match not found page |
-| `DuplicateUsernameException` | 409 | Registration form error |
-| `AccessDeniedException` | 403 | Access denied page |
-| Generic `Exception` | 500 | Generic error page |
-
----
-
-## Notes
-
-- Before submitting, change `spring.jpa.hibernate.ddl-auto=create` to `none` in `application.properties`
-- `spring.jpa.open-in-view=false`: lazy collections are initialized explicitly in controllers via `Hibernate.initialize()`
-- All user-visible strings are in `src/main/resources/messages.properties` (i18n ready)
-- The REST API (`/api/matches/**`) is consumed by the app's own `StadiumCapacityClient` via WebClient (no external dependency)
-- The `DataSeeder` only seeds data when the database is empty (idempotent)
+- `spring.jpa.open-in-view=false`: lazy-collecties worden expliciet geladen via `Hibernate.initialize()` in de controllers
+- Alle zichtbare teksten staan in `messages.properties` (EN) en `messages_nl.properties` (NL)
+- De REST-API (`/api/matches/**`) wordt door de app zelf geconsumeerd via `StadiumCapacityClient` (geen externe afhankelijkheid)
+- `DataSeeder` seed alleen als de databank leeg is (idempotent — herstart is veilig)
