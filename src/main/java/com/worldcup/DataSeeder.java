@@ -1,9 +1,13 @@
 package com.worldcup;
 
 import com.worldcup.domain.Match;
+import com.worldcup.domain.Prediction;
 import com.worldcup.domain.Role;
+import com.worldcup.domain.Team;
 import com.worldcup.domain.User;
 import com.worldcup.repository.MatchRepository;
+import com.worldcup.repository.PredictionRepository;
+import com.worldcup.repository.TeamRepository;
 import com.worldcup.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -11,7 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -20,18 +27,26 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MatchRepository matchRepository;
+    private final TeamRepository teamRepository;
+    private final PredictionRepository predictionRepository;
 
     public DataSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                      MatchRepository matchRepository) {
+                      MatchRepository matchRepository, TeamRepository teamRepository,
+                      PredictionRepository predictionRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.matchRepository = matchRepository;
+        this.teamRepository = teamRepository;
+        this.predictionRepository = predictionRepository;
     }
 
     @Override
     public void run(String... args) {
         seedAdmin();
         seedMatches();
+        seedDemoUsers();
+        seedDemoTeams();
+        seedDemoPredictions();
     }
 
     private void seedAdmin() {
@@ -114,5 +129,78 @@ public class DataSeeder implements CommandLineRunner {
         m.setStadiumCode(code);
         m.setChecksum(checksum);
         return m;
+    }
+
+    private static final String[] DEMO_USERNAMES = {
+        "alice", "bob", "charlie", "diana", "ethan", "fiona", "george", "hannah"
+    };
+
+    private void seedDemoUsers() {
+        String encodedPassword = passwordEncoder.encode("password123");
+        int created = 0;
+        for (String username : DEMO_USERNAMES) {
+            if (userRepository.findByUsername(username).isPresent()) continue;
+            User u = new User();
+            u.setUsername(username);
+            u.setEmail(username + "@example.com");
+            u.setPassword(encodedPassword);
+            u.setRole(Role.USER);
+            userRepository.save(u);
+            created++;
+        }
+        if (created > 0) log.info("Seeded {} demo users (password: password123).", created);
+    }
+
+    private void seedDemoTeams() {
+        if (teamRepository.count() > 0) return;
+
+        seedTeam("Oranje Boven",      "alice",  List.of("bob", "charlie"));
+        seedTeam("The Dribblers",     "diana",  List.of("ethan", "fiona"));
+        seedTeam("Hat Trick Heroes",  "george", List.of("hannah", "bob"));
+
+        log.info("Seeded 3 demo teams.");
+    }
+
+    private void seedTeam(String name, String ownerUsername, List<String> extraMembers) {
+        User owner = userRepository.findByUsername(ownerUsername).orElse(null);
+        if (owner == null) return;
+        Team team = new Team();
+        team.setName(name);
+        team.setInviteCode(UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase());
+        team.setOwner(owner);
+        team.getMembers().add(owner);
+        for (String memberUsername : extraMembers) {
+            userRepository.findByUsername(memberUsername).ifPresent(team.getMembers()::add);
+        }
+        teamRepository.save(team);
+    }
+
+    private void seedDemoPredictions() {
+        if (predictionRepository.count() > 0) return;
+
+        List<Match> matches = matchRepository.findAll();
+        if (matches.isEmpty()) return;
+
+        Random rng = new Random(2026);
+        int created = 0;
+        for (String username : DEMO_USERNAMES) {
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user == null) continue;
+            // each demo user predicts a random ~half of the matches
+            List<Match> shuffled = new ArrayList<>(matches);
+            java.util.Collections.shuffle(shuffled, rng);
+            int count = matches.size() / 2;
+            for (int i = 0; i < count; i++) {
+                Match m = shuffled.get(i);
+                Prediction p = new Prediction();
+                p.setUser(user);
+                p.setMatch(m);
+                p.setPredictedGoalsA(rng.nextInt(4));
+                p.setPredictedGoalsB(rng.nextInt(4));
+                predictionRepository.save(p);
+                created++;
+            }
+        }
+        log.info("Seeded {} demo predictions.", created);
     }
 }
